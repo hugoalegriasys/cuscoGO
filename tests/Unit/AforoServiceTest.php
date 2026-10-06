@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Unit;
 
 use App\Contracts\SiteSensorInterface;
 use App\Services\AforoService;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\TestCase; // Importante: TestCase del framework Laravel
+use PHPUnit\Framework\TestCase; // Base pura de PHPUnit (sin framework)
 
 class AforoServiceTest extends TestCase
 {
@@ -31,7 +31,7 @@ class AforoServiceTest extends TestCase
     }
 
     #[DataProvider('aforoCasosProvider')]
-    public function test_calcular_nivel_aforo_retorna_estado_correcto_mediante_ioc(int $capacidad, int $ocupacion, string $resultadoEsperado): void
+    public function test_calcular_nivel_aforo_retorna_estado_correcto(int $capacidad, int $ocupacion, string $resultadoEsperado): void
     {
         // GIVEN: Preparamos el doble de prueba (Mock) del sensor
         $sensorMock = Mockery::mock(SiteSensorInterface::class);
@@ -46,31 +46,26 @@ class AforoServiceTest extends TestCase
                    ->with('machu-picchu')
                    ->andReturn($ocupacion);
 
-        // INTEGRACIÓN LARAVEL: Registramos el contrato mockeado en el contenedor IoC
-        $this->instance(SiteSensorInterface::class, $sensorMock);
+        // WHEN: Instanciamos directamente la unidad a probar
+        $aforoService = new AforoService($sensorMock);
 
-        // Resolvemos el servicio desde el Service Container de Laravel
-        $aforoService = $this->app->make(AforoService::class);
-
-        // WHEN: Ejecutamos el método
+        // ACT: Ejecutamos el método
         $resultadoActual = $aforoService->calcularNivelAforo('machu-picchu');
 
         // THEN: Comprobamos el resultado
         $this->assertEquals($resultadoEsperado, $resultadoActual);
     }
 
-    // Archivo: tests/Feature/AforoServiceTest.php
     public function test_calcular_nivel_aforo_lanza_error_por_sobrecapacidad(): void
     {
-        // Arrange: Simulación de lecturas de sensores de entrada/salida en Qorikancha
+        // Arrange
         $sensorMock = Mockery::mock(SiteSensorInterface::class);
         $sensorMock->shouldReceive('getCapacidad')->andReturn(100);
         $sensorMock->shouldReceive('getOcupacion')->andReturn(120);
 
-        // Act & Assert
-        $this->instance(SiteSensorInterface::class, $sensorMock);
-        $aforoService = $this->app->make(AforoService::class);
+        $aforoService = new AforoService($sensorMock);
 
+        // Act & Assert
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Error: La ocupación supera la capacidad máxima.');
 
@@ -79,13 +74,14 @@ class AforoServiceTest extends TestCase
 
     public function test_lanza_excepcion_si_ocupacion_es_negativa(): void
     {
+        // Arrange: Simulación de lectura defectuosa con número negativo (-5)
         $sensorMock = Mockery::mock(SiteSensorInterface::class);
         $sensorMock->shouldReceive('getCapacidad')->andReturn(100);
         $sensorMock->shouldReceive('getOcupacion')->andReturn(-5);
 
-        $this->instance(SiteSensorInterface::class, $sensorMock);
-        $aforoService = $this->app->make(AforoService::class);
+        $aforoService = new AforoService($sensorMock);
 
+        // Act & Assert
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Error: La ocupación no puede ser negativa.');
 
@@ -94,13 +90,14 @@ class AforoServiceTest extends TestCase
 
     public function test_lanza_excepcion_si_capacidad_es_invalida(): void
     {
+        // Arrange: Simulación de capacidad en 0
         $sensorMock = Mockery::mock(SiteSensorInterface::class);
         $sensorMock->shouldReceive('getCapacidad')->andReturn(0);
         $sensorMock->shouldReceive('getOcupacion')->andReturn(10);
 
-        $this->instance(SiteSensorInterface::class, $sensorMock);
-        $aforoService = $this->app->make(AforoService::class);
+        $aforoService = new AforoService($sensorMock);
 
+        // Act & Assert
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Error: La capacidad máxima debe ser mayor a cero.');
 
