@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
+use App\Contracts\DisponibilidadServiceInterface;
 use InvalidArgumentException;
 
-class DisponibilidadService
+class DisponibilidadService implements DisponibilidadServiceInterface
 {
     private function esFormatoHoraValido(string $hora): bool
     {
-        // Valida que el formato sea estrictamente HH:MM entre 00:00 y 23:59 (rechaza negativos)
         return (bool) preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/', $hora);
     }
 

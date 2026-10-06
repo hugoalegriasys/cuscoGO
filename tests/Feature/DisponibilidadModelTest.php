@@ -4,18 +4,22 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Contracts\DisponibilidadServiceInterface;
 use App\Services\DisponibilidadService;
 use InvalidArgumentException;
 
-class DisponibilidadFeatureTest extends TestCase
+class DisponibilidadModelTest extends TestCase
 {
-    private DisponibilidadService $service;
+    use RefreshDatabase;
+
+    private DisponibilidadServiceInterface $service;
 
     protected function setUp(): void
     {
         parent::setUp();
-        // Given: Se resuelve el servicio desde el Service Container de Laravel
-        $this->service = $this->app->make(DisponibilidadService::class);
+        // Given: Se resuelve el servicio utilizando la Interfaz / Contrato desde el Container
+        $this->service = $this->app->make(DisponibilidadServiceInterface::class);
     }
 
     #[Test]
@@ -29,7 +33,7 @@ class DisponibilidadFeatureTest extends TestCase
         // When: Se evalúa la operatividad mediante el servicio resuelto por Laravel
         $resultado = $this->service->estaOperativo($horaActual, $apertura, $cierre);
 
-        // Then: El servicio debe ser la instancia correcta y confirmar que el sitio está operativo
+        // Then: El servicio debe ser la instancia del contrato y confirmar que está operativo
         $this->assertInstanceOf(DisponibilidadService::class, $this->service);
         $this->assertTrue($resultado);
     }
