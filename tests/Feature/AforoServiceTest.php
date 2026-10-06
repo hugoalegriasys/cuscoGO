@@ -59,19 +59,22 @@ class AforoServiceTest extends TestCase
         $this->assertEquals($resultadoEsperado, $resultadoActual);
     }
 
+    // Archivo: tests/Feature/AforoServiceTest.php
     public function test_calcular_nivel_aforo_lanza_error_por_sobrecapacidad(): void
     {
+        // Arrange: Simulación de lecturas de sensores de entrada/salida en Qorikancha
         $sensorMock = Mockery::mock(SiteSensorInterface::class);
         $sensorMock->shouldReceive('getCapacidad')->andReturn(100);
         $sensorMock->shouldReceive('getOcupacion')->andReturn(120);
 
+        // Act & Assert
         $this->instance(SiteSensorInterface::class, $sensorMock);
         $aforoService = $this->app->make(AforoService::class);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Error: La ocupación supera la capacidad máxima.');
 
-        $aforoService->calcularNivelAforo('machu-picchu');
+        $aforoService->calcularNivelAforo('Qoricancha');
     }
 
     public function test_lanza_excepcion_si_ocupacion_es_negativa(): void
