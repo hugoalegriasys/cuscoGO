@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\DisponibilidadController;
 use App\Http\Controllers\SitioPatrimonialController;
+use App\Http\Controllers\TransporteController;
 use App\Models\SitioPatrimonial;
 use Illuminate\Support\Facades\Route;
 
@@ -34,3 +35,17 @@ Route::resource('sitios', SitioPatrimonialController::class);
 // Evaluación de estado de operatividad (petición AJAX con respuesta JSON).
 Route::post('/sitios/{sitio}/verificar', [SitioPatrimonialController::class, 'verificar'])
     ->name('sitios.verificar');
+
+/*
+|--------------------------------------------------------------------------
+| Cálculo del Costo del Transporte Turístico (CUS-04)
+|--------------------------------------------------------------------------
+| Cotización web por modalidad de transporte con tarifa por pasajero
+| o tarifa fija por vehículo.
+*/
+Route::prefix('transporte')->name('transporte.')->group(function (): void {
+    Route::get('/calcular', [TransporteController::class, 'index'])
+        ->name('calcular');
+    Route::post('/calcular', [TransporteController::class, 'calcularWeb'])
+        ->name('calcular.evaluar');
+});
