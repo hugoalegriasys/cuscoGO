@@ -1,0 +1,27 @@
+env:
+  contexts:
+    - name: "CuscoGO"
+      urls:
+        - "http://127.0.0.1:8000"
+      includePaths:
+        - "http://127.0.0.1:8000.*"
+  parameters:
+    failOnError: false
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  - type: spider
+    parameters:
+      context: "CuscoGO"
+      maxDuration: 2
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 2
+
+  - type: report
+    parameters:
+      template: "traditional-html"
+      reportDir: "tests/no-funcionales"
+      reportFile: "reporte_seguridad_cuscogo"
