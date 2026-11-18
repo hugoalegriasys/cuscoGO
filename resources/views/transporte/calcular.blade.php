@@ -11,16 +11,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-surface font-body-md text-body-md text-on-surface antialiased">
+<body class="min-h-screen bg-surface text-body-md text-on-surface antialiased">
     <header class="fixed top-0 z-50 w-full border-b border-surface-container-highest bg-surface/90 shadow-[0_1px_8px_rgba(0,0,0,0.02)] backdrop-blur-md">
-        <div class="mx-auto flex h-20 max-w-[1100px] items-center justify-between px-6">
+        <div class="mx-auto flex h-20 max-w-275 items-center justify-between px-6">
             <a href="{{ url('/') }}" class="flex items-center gap-3">
                 <span class="flex items-center justify-center text-primary-container">
                     <svg class="h-6 w-6 fill-none stroke-current stroke-[1.5]" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M3 19h18M5 15h14M7 11h10M9 7h6M11 3h2" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </span>
-                <span class="font-headline-md text-headline-md font-serif tracking-tight text-primary">Cusco<span class="font-normal italic text-secondary">Go</span></span>
+                <span class="font-headline-md text-headline-md tracking-tight text-primary">Cusco<span class="font-normal italic text-secondary">Go</span></span>
             </a>
             <div class="inline-flex items-center gap-2 rounded-full border border-surface-container-highest bg-surface-container-highest px-3 py-1.5 font-label-sm text-label-sm tracking-wide text-on-surface-variant">
                 <span class="h-1.5 w-1.5 rounded-full bg-primary-container animate-pulse"></span>
@@ -30,10 +30,10 @@
     </header>
 
     <main class="min-h-[calc(100vh-80px)] w-full bg-surface pt-20">
-        <div class="mx-auto max-w-[1100px] px-6 py-8">
+        <div class="mx-auto max-w-275 px-6 py-8">
             <header class="flex w-full flex-col items-start pb-6 pt-1">
                 <p class="font-label-md text-label-md uppercase tracking-wider text-secondary">CUS-04 · Cálculo del Costo del Transporte Turístico</p>
-                <h1 class="mt-3 max-w-3xl text-left font-headline-lg text-headline-lg font-serif tracking-tight text-on-surface">Cotiza tu transporte en Cusco</h1>
+                <h1 class="mt-3 max-w-3xl text-left font-headline-lg text-headline-lg tracking-tight text-on-surface">Cotiza tu transporte en Cusco</h1>
                 <p class="mt-2 max-w-2xl font-body-lg text-body-lg text-on-surface-variant">Elige la modalidad, indica la cantidad de pasajeros y conoce el costo total al instante.</p>
             </header>
 
@@ -111,7 +111,7 @@
                                         min="1"
                                         step="1"
                                         inputmode="numeric"
-                                        class="h-12 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-4 font-body-md text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
+                                        class="h-12 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-4 text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
                                     >
                                     <p class="font-body-sm text-body-sm text-on-surface-variant">Debe ser un entero mayor a cero.</p>
                                 </div>
@@ -127,7 +127,7 @@
                                         min="0"
                                         step="0.01"
                                         inputmode="decimal"
-                                        class="h-12 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-4 font-body-md text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
+                                        class="h-12 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-4 text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
                                     >
                                     <p class="font-body-sm text-body-sm text-on-surface-variant">Monto por persona o tarifa fija, según la modalidad.</p>
                                 </div>
@@ -159,10 +159,10 @@
                             </div>
 
                             <div class="rounded-xl border border-[#F0C2AE] bg-[#FDF0EA] p-8 text-center">
-                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#A0401D] shadow-sm">
+                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-secondary shadow-sm">
                                     <span class="material-symbols-outlined text-[28px]">warning</span>
                                 </div>
-                                <span data-cy="badge-resultado" class="inline-flex items-center gap-2 rounded-full bg-[#A0401D] px-4 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white shadow-sm">
+                                <span data-cy="badge-resultado" class="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white shadow-sm">
                                     <span class="h-1.5 w-1.5 rounded-full bg-[#FFD8C9]"></span>
                                     ERROR DE VALIDACIÓN
                                 </span>
@@ -186,15 +186,15 @@
                             </div>
 
                             <div class="mb-6 rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] p-8 text-center">
-                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#1E4D3B] shadow-sm">
+                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-primary-container shadow-sm">
                                     <span class="material-symbols-outlined text-[28px]">directions_bus</span>
                                 </div>
-                                <span data-cy="badge-resultado" class="inline-flex items-center gap-2 rounded-full bg-[#1E4D3B] px-4 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white shadow-sm">
+                                <span data-cy="badge-resultado" class="inline-flex items-center gap-2 rounded-full bg-primary-container px-4 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white shadow-sm">
                                     <span class="h-1.5 w-1.5 rounded-full bg-[#A7F3D0] animate-ping"></span>
                                     {{ $resultado['modalidad_cobro'] }}
                                 </span>
-                                <p data-cy="costo-total" class="mt-4 font-display text-display font-serif tabular-nums text-[#1E4D3B]">S/ {{ number_format((float) $resultado['costo_total'], 2) }}</p>
-                                <p data-cy="mensaje-resultado" class="mx-auto mt-2 max-w-sm font-body-sm text-body-sm leading-relaxed text-[#1E4D3B]">{{ $resultado['mensaje'] }}</p>
+                                <p data-cy="costo-total" class="mt-4 font-display text-display tabular-nums text-primary-container">S/ {{ number_format((float) $resultado['costo_total'], 2) }}</p>
+                                <p data-cy="mensaje-resultado" class="mx-auto mt-2 max-w-sm font-body-sm text-body-sm leading-relaxed text-primary-container">{{ $resultado['mensaje'] }}</p>
                             </div>
 
                             <div class="grid grid-cols-1 gap-4 text-left font-body-sm sm:grid-cols-2">
@@ -204,15 +204,15 @@
                                 </div>
                                 <div class="flex flex-col rounded-xl border border-surface-container-highest bg-surface-container-low p-4">
                                     <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">CANTIDAD DE PASAJEROS</span>
-                                    <span class="mt-1 font-body-md text-body-md font-semibold font-mono tabular-nums text-on-surface">{{ $resultado['pasajeros'] }}</span>
+                                    <span class="mt-1 text-body-md font-semibold font-mono tabular-nums text-on-surface">{{ $resultado['pasajeros'] }}</span>
                                 </div>
                                 <div class="flex flex-col rounded-xl border border-surface-container-highest bg-surface-container-low p-4">
                                     <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">TARIFA UNITARIA / BASE</span>
-                                    <span class="mt-1 font-body-md text-body-md font-semibold font-mono tabular-nums text-on-surface">S/ {{ number_format((float) $resultado['precio_unitario'], 2) }}</span>
+                                    <span class="mt-1 text-body-md font-semibold font-mono tabular-nums text-on-surface">S/ {{ number_format((float) $resultado['precio_unitario'], 2) }}</span>
                                 </div>
                                 <div class="flex flex-col rounded-xl border border-surface-container-highest bg-surface-container-low p-4">
                                     <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">TOTAL A PAGAR</span>
-                                    <span class="mt-1 font-body-md text-body-md font-semibold font-mono tabular-nums text-primary">S/ {{ number_format((float) $resultado['costo_total'], 2) }}</span>
+                                    <span class="mt-1 text-body-md font-semibold font-mono tabular-nums text-primary">S/ {{ number_format((float) $resultado['costo_total'], 2) }}</span>
                                 </div>
                             </div>
                         </section>
@@ -237,7 +237,7 @@
     </main>
 
     <footer class="w-full border-t border-surface-container-highest bg-surface-container-low py-10">
-        <div class="mx-auto flex max-w-[1100px] flex-col items-center justify-between gap-4 px-6 md:flex-row">
+        <div class="mx-auto flex max-w-275 flex-col items-center justify-between gap-4 px-6 md:flex-row">
             <p class="w-full text-center font-body-sm text-body-sm text-on-surface-variant">© {{ date('Y') }} CuscoGo</p>
         </div>
     </footer>

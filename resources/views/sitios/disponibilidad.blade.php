@@ -11,16 +11,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-surface font-body-md text-body-md text-on-surface antialiased" data-hora-servidor="{{ $horaActual }}:00">
+<body class="min-h-screen bg-surface text-body-md text-on-surface antialiased" data-hora-servidor="{{ $horaActual }}:00">
     <header class="fixed top-0 z-50 w-full border-b border-surface-container-highest bg-surface/90 shadow-[0_1px_8px_rgba(0,0,0,0.02)] backdrop-blur-md">
-        <div class="mx-auto flex h-20 max-w-[1100px] items-center justify-between px-6">
+        <div class="mx-auto flex h-20 max-w-275 items-center justify-between px-6">
             <a href="{{ url('/') }}" class="flex items-center gap-3">
                 <span class="flex items-center justify-center text-primary-container">
                     <svg class="h-6 w-6 fill-none stroke-current stroke-[1.5]" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M3 19h18M5 15h14M7 11h10M9 7h6M11 3h2" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </span>
-                <span class="font-headline-md text-headline-md font-serif tracking-tight text-primary">Cusco<span class="font-normal italic text-secondary">Go</span></span>
+                <span class="font-headline-md text-headline-md tracking-tight text-primary">Cusco<span class="font-normal italic text-secondary">Go</span></span>
             </a>
             <div class="inline-flex items-center gap-2 rounded-full border border-surface-container-highest bg-surface-container-highest px-3 py-1.5 font-label-sm text-label-sm tracking-wide text-on-surface-variant">
                 <span class="h-1.5 w-1.5 rounded-full bg-primary-container animate-pulse"></span>
@@ -30,10 +30,10 @@
     </header>
 
     <main class="min-h-[calc(100vh-80px)] w-full bg-surface pt-20">
-        <div class="mx-auto max-w-[1100px] px-6 py-8">
+        <div class="mx-auto max-w-275 px-6 py-8">
             <header class="flex w-full flex-col items-start pb-6 pt-1">
                 <p class="font-label-md text-label-md uppercase tracking-wider text-secondary">CUS-03 · Evaluación de estado de operatividad</p>
-                <h1 class="mt-3 max-w-3xl text-left font-headline-lg text-headline-lg font-serif tracking-tight text-on-surface">Disponibilidad de sitios turísticos</h1>
+                <h1 class="mt-3 max-w-3xl text-left font-headline-lg text-headline-lg tracking-tight text-on-surface">Disponibilidad de sitios turísticos</h1>
                 <p class="mt-2 max-w-2xl font-body-lg text-body-lg text-on-surface-variant">Consulta si un destino está abierto o cerrado según su horario de atención.</p>
             </header>
 
@@ -92,7 +92,7 @@
                                         name="fecha"
                                         data-cy="fecha"
                                         value="{{ old('fecha', $fechaActual) }}"
-                                        class="h-12 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-4 font-body-md text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
+                                        class="h-12 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-4 text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
                                     >
                                     <p class="font-body-sm text-body-sm text-on-surface-variant">Opcional. Se usa para determinar el día de la semana.</p>
                                 </div>
@@ -108,7 +108,7 @@
                                             value="{{ old('hora_actual', $horaActual) }}"
                                             step="60"
                                             required
-                                            class="h-12 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-4 font-body-md text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
+                                            class="h-12 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-4 text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
                                         >
                                         <button
                                             type="button"
@@ -143,7 +143,7 @@
                                             data-cy="apertura"
                                             value="{{ old('apertura', '09:00') }}"
                                             step="60"
-                                            class="h-11 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-3 text-center font-body-md text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
+                                            class="h-11 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-3 text-center text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
                                         >
                                     </div>
                                     <div class="flex flex-col gap-1.5">
@@ -155,7 +155,7 @@
                                             data-cy="cierre"
                                             value="{{ old('cierre', '17:00') }}"
                                             step="60"
-                                            class="h-11 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-3 text-center font-body-md text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
+                                            class="h-11 w-full rounded-lg border border-surface-container-highest bg-surface-container-lowest px-3 text-center text-body-md font-mono tabular-nums text-on-surface transition-colors focus:border-primary focus:outline-none"
                                         >
                                     </div>
                                 </div>
@@ -187,10 +187,10 @@
                             </div>
 
                             <div class="rounded-xl border border-[#F0C2AE] bg-[#FDF0EA] p-8 text-center">
-                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#A0401D] shadow-sm">
+                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-secondary shadow-sm">
                                     <span class="material-symbols-outlined text-[28px]">warning</span>
                                 </div>
-                                <span data-cy="badge-resultado" class="inline-flex items-center gap-2 rounded-full bg-[#A0401D] px-4 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white shadow-sm">
+                                <span data-cy="badge-resultado" class="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white shadow-sm">
                                     <span class="h-1.5 w-1.5 rounded-full bg-[#FFD8C9]"></span>
                                     ERROR DE VALIDACIÓN
                                 </span>
@@ -220,14 +220,14 @@
                             </div>
 
                             <div class="mb-6 rounded-xl border p-8 text-center {{ $abierto ? 'border-[#A7F3D0] bg-[#ECFDF5]' : 'border-[#F0C2AE] bg-[#FDF0EA]' }}">
-                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm {{ $abierto ? 'text-[#1E4D3B]' : 'text-[#A0401D]' }}">
+                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm {{ $abierto ? 'text-primary-container' : 'text-secondary' }}">
                                     <span class="material-symbols-outlined text-[28px]">{{ $abierto ? 'check_circle' : 'door_front' }}</span>
                                 </div>
-                                <span data-cy="badge-resultado" class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white shadow-sm {{ $abierto ? 'bg-[#1E4D3B]' : 'bg-[#A0401D]' }}">
+                                <span data-cy="badge-resultado" class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white shadow-sm {{ $abierto ? 'bg-primary-container' : 'bg-secondary' }}">
                                     <span class="h-1.5 w-1.5 rounded-full {{ $abierto ? 'animate-ping bg-[#A7F3D0]' : 'bg-[#FFD8C9]' }}"></span>
                                     {{ $resultado['estado'] }}
                                 </span>
-                                <p data-cy="mensaje-resultado" class="mx-auto mt-3 max-w-sm font-body-md text-body-md leading-relaxed {{ $abierto ? 'text-[#1E4D3B]' : 'text-[#8C2F12]' }}">{{ $resultado['mensaje'] }}</p>
+                                <p data-cy="mensaje-resultado" class="mx-auto mt-3 max-w-sm font-body-md text-body-md leading-relaxed {{ $abierto ? 'text-primary-container' : 'text-[#8C2F12]' }}">{{ $resultado['mensaje'] }}</p>
                             </div>
 
                             <div class="grid grid-cols-1 gap-4 text-left font-body-sm sm:grid-cols-2">
@@ -237,11 +237,11 @@
                                 </div>
                                 <div class="flex flex-col rounded-xl border border-surface-container-highest bg-surface-container-low p-4">
                                     <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">HORARIO DE ATENCIÓN</span>
-                                    <span class="mt-1 font-body-md text-body-md font-semibold font-mono tabular-nums text-on-surface">{{ $resultado['horario'] }}</span>
+                                    <span class="mt-1 text-body-md font-semibold font-mono tabular-nums text-on-surface">{{ $resultado['horario'] }}</span>
                                 </div>
                                 <div class="flex flex-col rounded-xl border border-surface-container-highest bg-surface-container-low p-4">
                                     <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">HORA EVALUADA</span>
-                                    <span class="mt-1 font-body-md text-body-md font-semibold font-mono tabular-nums text-on-surface">{{ $resultado['hora_actual'] }}</span>
+                                    <span class="mt-1 text-body-md font-semibold font-mono tabular-nums text-on-surface">{{ $resultado['hora_actual'] }}</span>
                                 </div>
                                 <div class="flex flex-col rounded-xl border border-surface-container-highest bg-surface-container-low p-4">
                                     <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">FECHA Y DÍA</span>
@@ -270,7 +270,7 @@
     </main>
 
     <footer class="w-full border-t border-surface-container-highest bg-surface-container-low py-10">
-        <div class="mx-auto flex max-w-[1100px] flex-col items-center justify-between gap-4 px-6 md:flex-row">
+        <div class="mx-auto flex max-w-275 flex-col items-center justify-between gap-4 px-6 md:flex-row">
             <p class="w-full text-center font-body-sm text-body-sm text-on-surface-variant">© {{ date('Y') }} CuscoGo</p>
         </div>
     </footer>
