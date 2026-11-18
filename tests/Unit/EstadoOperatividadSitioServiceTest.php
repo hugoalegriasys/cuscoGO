@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Capa de pruebas unitarias de CUS-03 enfocada en sitios patrimoniales.
+ * Valida verificarSitioAbierto(), evaluarEstadoOperatividad(), el DTO resultante y los mutators del modelo,
+ * usando modelos en memoria sin HTTP, base de datos ni navegador.
+ * Detecta regresiones en la conversión de estados ABIERTO / CERRADO / INACTIVO antes de llegar al controlador.
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Unit;
@@ -44,6 +51,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
      * verificarSitioAbierto()
      * ===================================================================== */
 
+    /**
+     * Propósito: Verificar que verificarSitioAbierto() devuelva true dentro del horario.
+     * Escenario: Sitio Qorikancha 09:00-17:00 consultado a las 10:00 -> ABIERTO (true).
+     * Importancia: Previene falsos CERRADO que dejarían al turista sin información válida.
+     */
     #[Test]
     public function sitio_esta_abierto_dentro_del_horario_de_atencion(): void
     {
@@ -52,6 +64,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->assertTrue($this->service->verificarSitioAbierto($sitio, '10:00'));
     }
 
+    /**
+     * Propósito: Confirmar que fuera del rango el sitio no se reporte abierto.
+     * Escenario: Qorikancha 09:00-17:00 consultado a las 18:00 -> CERRADO (false).
+     * Importancia: Evita mostrar ABIERTO cuando el sitio ya cerró.
+     */
     #[Test]
     public function sitio_no_esta_abierto_fuera_del_horario_de_atencion(): void
     {
@@ -60,6 +77,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->assertFalse($this->service->verificarSitioAbierto($sitio, '18:00'));
     }
 
+    /**
+     * Propósito: Asegurar que el estado inactivo gane sobre cualquier horario.
+     * Escenario: Sitio con activo=false consultado a las 10:00 -> false.
+     * Importancia: Impide que un sitio temporalmente cerrado aparezca como ABIERTO por su horario.
+     */
     #[Test]
     public function sitio_inactivo_nunca_se_reporta_como_abierto(): void
     {
@@ -68,6 +90,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->assertFalse($this->service->verificarSitioAbierto($sitio, '10:00'));
     }
 
+    /**
+     * Propósito: Probar la ruta por defecto cuando no se envía hora de consulta.
+     * Escenario: Horario 00:00-23:59 y horaActual=null -> usa Carbon::now() -> true.
+     * Importancia: Evita que el widget AJAX falle cuando el usuario deja el campo vacío.
+     */
     #[Test]
     public function sitio_esta_abierto_cuando_se_consulta_con_la_hora_actual_del_sistema(): void
     {
@@ -84,6 +111,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
      * evaluarEstadoOperatividad()
      * ===================================================================== */
 
+    /**
+     * Propósito: Validar que evaluarEstadoOperatividad() construya el DTO ABIERTO con todos sus campos.
+     * Escenario: Sacsayhuamán 09:00-17:00 consultado a las 10:00 -> estado 'abierto', operativo true y mensaje.
+     * Importancia: Previene respuestas JSON incompletas o con el nombre/horario equivocados.
+     */
     #[Test]
     public function evaluacion_devuelve_dto_abierto_con_los_datos_correctos(): void
     {
@@ -101,6 +133,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->assertStringContainsStringIgnoringCase('abierto', $estado->mensaje);
     }
 
+    /**
+     * Propósito: Validar el DTO CERRADO cuando la hora cae fuera del horario.
+     * Escenario: Qorikancha 09:00-17:00 consultado a las 18:00 -> estado 'cerrado', operativo false.
+     * Importancia: Evita que la tarjeta muestre datos de otro sitio o una hora distinta a la consultada.
+     */
     #[Test]
     public function evaluacion_devuelve_dto_cerrado_con_los_datos_correctos(): void
     {
@@ -114,6 +151,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->assertStringContainsStringIgnoringCase('cerrado', $estado->mensaje);
     }
 
+    /**
+     * Propósito: Comprobar el estado INACTIVO en el DTO.
+     * Escenario: Sitio activo=false consultado a las 10:00 -> estado 'inactivo' y mensaje exacto.
+     * Importancia: Asegura que el mensaje al turista sea claro y no parezca un error técnico.
+     */
     #[Test]
     public function evaluacion_devuelve_dto_inactivo_cuando_el_sitio_esta_desactivado(): void
     {
@@ -126,6 +168,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->assertSame('El sitio patrimonial se encuentra temporalmente inactivo.', $estado->mensaje);
     }
 
+    /**
+     * Propósito: Revisar que toArray() exponga todas las claves que consume la vista/AJAX.
+     * Escenario: Evaluación ABIERTA a las 10:00 -> arreglo con sitio_id, estado, operativo, horas y mensaje.
+     * Importancia: Previene errores en la respuesta JSON por claves faltantes o renombradas.
+     */
     #[Test]
     public function evaluacion_convierte_el_dto_a_un_arreglo_asociativo_completo(): void
     {
@@ -148,6 +195,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
      * Casos de borde y manejo defensivo de errores
      * ===================================================================== */
 
+    /**
+     * Propósito: Validar el mensaje de error cuando la hora de consulta está fuera de rango.
+     * Escenario: hora '25:00' -> InvalidArgumentException con texto 'hora de consulta'.
+     * Importancia: Garantiza que el endpoint AJAX pueda mostrar un error entendible al usuario.
+     */
     #[Test]
     public function evaluacion_lanza_excepcion_si_la_hora_de_consulta_es_invalida(): void
     {
@@ -159,6 +211,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->service->evaluarEstadoOperatividad($sitio, '25:00');
     }
 
+    /**
+     * Propósito: Cubrir formatos de hora rechazados además del rango.
+     * Escenario: hora '-10:00' -> InvalidArgumentException.
+     * Importancia: Evita que un signo o formato extraño se procese como una hora válida.
+     */
     #[Test]
     public function evaluacion_lanza_excepcion_si_la_hora_de_consulta_tiene_formato_incorrecto(): void
     {
@@ -169,6 +226,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->service->evaluarEstadoOperatividad($sitio, '-10:00');
     }
 
+    /**
+     * Propósito: Proteger el flujo ante sitios sin horario cargado en BD.
+     * Escenario: setRawAttributes con apertura/cierre null -> excepción 'no tiene un horario de atención'.
+     * Importancia: Previene un error fatal de tipos al intentar comparar horas inexistentes.
+     */
     #[Test]
     public function evaluacion_lanza_excepcion_si_el_sitio_no_tiene_horario_registrado(): void
     {
@@ -187,6 +249,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->service->evaluarEstadoOperatividad($sitio, '10:00');
     }
 
+    /**
+     * Propósito: Manejar datos persistidos corruptos que burlaron los mutators del modelo.
+     * Escenario: apertura '18:00' y cierre '09:00' vía setRawAttributes -> excepción 'horario de atención'.
+     * Importancia: Evita responder ABIERTO con un horario imposible que debería haberse rechazado.
+     */
     #[Test]
     public function evaluacion_lanza_excepcion_si_el_horario_registrado_es_incoherente(): void
     {
@@ -207,6 +274,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $this->service->evaluarEstadoOperatividad($sitio, '10:00');
     }
 
+    /**
+     * Propósito: Verificar el mutator que valida la hora de apertura antes de guardar.
+     * Escenario: asignar '25:00' a hora_apertura -> InvalidArgumentException con 'hora de apertura'.
+     * Importancia: Impide que se persistan horarios inválidos que luego romperían la evaluación.
+     */
     #[Test]
     public function el_modelo_rechaza_horas_con_formato_invalido_al_persistir(): void
     {
@@ -217,6 +289,11 @@ class EstadoOperatividadSitioServiceTest extends TestCase
         $sitio->hora_apertura = '25:00';
     }
 
+    /**
+     * Propósito: Confirmar que MySQL devuelve 'HH:MM:SS' y el modelo lo convierte a 'HH:MM'.
+     * Escenario: raw '06:00:00' y '17:00:00' -> '06:00', '17:00' y horario '06:00 - 17:00'.
+     * Importancia: Evita que los segundos provoquen comparaciones erróneas o textos raros en la vista.
+     */
     #[Test]
     public function el_modelo_normaliza_horas_con_segundos_al_leer_de_base_de_datos(): void
     {

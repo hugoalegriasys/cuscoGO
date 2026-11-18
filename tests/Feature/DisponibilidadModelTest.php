@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Capa de pruebas Feature de integración de CUS-03 con el contenedor de Laravel.
+ * Verifica que DisponibilidadServiceInterface se resuelva correctamente y que el servicio
+ * aplique las mismas reglas de operatividad y excepciones al usar la app real, sin navegador.
+ * Previene fallos de configuración de bindings que las pruebas unitarias no detectan.
+ */
+
 namespace Tests\Feature;
 
 use Tests\TestCase;
@@ -22,6 +29,11 @@ class DisponibilidadModelTest extends TestCase
         $this->service = $this->app->make(DisponibilidadServiceInterface::class);
     }
 
+    /**
+     * Propósito: Verificar que Laravel resuelva el contrato con la implementación correcta.
+     * Escenario: app()->make(DisponibilidadServiceInterface) con 10:00/08:00-17:00 -> DisponibilidadService y true.
+     * Importancia: Previene fallos de binding en producción que las pruebas unitarias no detectan.
+     */
     #[Test]
     public function integra_servicio_de_disponibilidad_desde_el_contenedor_de_laravel(): void
     {
@@ -38,6 +50,11 @@ class DisponibilidadModelTest extends TestCase
         $this->assertTrue($resultado);
     }
 
+    /**
+     * Propósito: Confirmar que el servicio inyectado por el container mantenga sus validaciones.
+     * Escenario: hora '-05:00' -> InvalidArgumentException.
+     * Importancia: Evita que una mala configuración del contenedor permita evaluaciones inválidas.
+     */
     #[Test]
     public function rechaza_horarios_invalidos_en_el_flujo_de_integracion(): void
     {
