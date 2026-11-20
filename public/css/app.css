@@ -89,7 +89,10 @@ body {
 
 .form-card { max-width: 720px; }
 .field { margin-bottom: 1rem; }
+fieldset.field { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: .75rem 1rem 1rem; }
+legend { font-weight: 600; padding: 0 .25rem; }
 label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.field-help { margin: .1rem 0 .5rem; color: var(--color-muted); font-size: .95rem; }
 input, select, textarea {
   width: 100%; padding: .7rem .8rem; border-radius: var(--radius-sm); border: 1px solid #c8b79e;
   background: #fff; color: var(--color-text); font: inherit;
@@ -114,6 +117,19 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 .result-area { margin-top: 1rem; padding: 1rem; border-radius: var(--radius-sm); background: var(--color-surface-alt); border: 1px solid var(--color-border); }
 .result-label { margin: 0 0 .35rem; font-weight: 600; color: var(--color-muted); }
 .result-detail { margin: .5rem 0 0; color: var(--color-muted); }
+.promedio-valor { font-size: 2rem; font-weight: 800; margin: 0 0 .5rem; color: var(--color-primary-dark); }
+.resena-lista { list-style: none; padding: 0; margin: .5rem 0 0; display: grid; gap: .75rem; }
+.resena-item { padding: .75rem .9rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: #fff; }
+.resena-meta { margin: 0 0 .25rem; font-weight: 700; color: var(--color-primary-dark); }
+.resena-texto { margin: 0; color: var(--color-text); }
+.resena-empty { color: var(--color-muted); font-style: italic; }
+.char-counter { margin: .35rem 0 0; text-align: right; color: var(--color-muted); font-size: .9rem; }
+.rating { display: inline-flex; flex-direction: row-reverse; gap: .15rem; }
+.rating-input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.rating-label { font-size: 2rem; color: #c8b79e; cursor: pointer; padding: 0 .1rem; line-height: 1; transition: color var(--transition), transform var(--transition); }
+.rating-label:hover, .rating-label:hover ~ .rating-label { color: var(--color-accent); }
+.rating-input:checked ~ .rating-label { color: var(--color-accent); }
+.rating-input:focus-visible + .rating-label { outline: 3px solid rgba(200,155,60,0.5); outline-offset: 2px; border-radius: 6px; color: var(--color-accent); }
 .badge {
   display: inline-flex; align-items: center; gap: .4rem; margin: 0; padding: .4rem .8rem; border-radius: 999px;
   font-weight: 800; letter-spacing: .02em; border: 2px solid transparent;

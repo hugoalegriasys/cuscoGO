@@ -12,34 +12,51 @@ class ResenaService
     ) {
     }
 
-    // Valida que la calificación esté entre 1 y 5.
-    public function validarCalificacion(int $calificacion): bool
+    // Valida que la calificación sea un entero entre 1 y 5.
+    public function validarCalificacion(mixed $calificacion): bool
     {
-        if ($calificacion < 1 || $calificacion > 5) {
+        if (!is_int($calificacion) || $calificacion < 1 || $calificacion > 5) {
             return false;
         }
 
         return true;
     }
 
-    // Valida que el comentario no esté vacío.
+    // Valida que el comentario no esté vacío y no supere 500 caracteres.
     public function validarComentario(string $comentario): bool
     {
-        return trim($comentario) !== '';
+        $comentarioLimpio = trim($comentario);
+
+        if ($comentarioLimpio === '') {
+            return false;
+        }
+
+        return mb_strlen($comentarioLimpio) <= 500;
     }
 
     // Obtiene las calificaciones y calcula su promedio.
     public function calcularPromedioCalificaciones(): float
     {
-        // Pide las calificaciones al repositorio.
         $calificaciones = $this->resenaRepository->obtenerCalificaciones();
 
-        // Si no existen calificaciones, devuelve 0.0.
+        return $this->calcularPromedioDesdeArreglo($calificaciones);
+    }
+
+    public function calcularPromedioCalificacionesPorSitio(int $sitioId): float
+    {
+        $calificaciones = $this->resenaRepository->obtenerCalificacionesPorSitio($sitioId);
+
+        return $this->calcularPromedioDesdeArreglo($calificaciones);
+    }
+
+    private function calcularPromedioDesdeArreglo(array $calificaciones): float
+    {
         if (count($calificaciones) === 0) {
             return 0.0;
         }
 
-        // Calcula y devuelve el promedio.
-        return array_sum($calificaciones) / count($calificaciones);
+        $promedio = array_sum($calificaciones) / count($calificaciones);
+
+        return round($promedio, 1);
     }
 }

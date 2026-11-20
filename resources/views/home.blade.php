@@ -17,7 +17,7 @@
             <span class="card-cta">Consultar aforo</span>
         </article>
     </a>
-    <a class="card-link" href="{{ url('/resenas') }}" data-cy="card-resenas">
+    <a class="card-link" href="{{ route('resenas.index') }}" data-cy="card-resenas">
         <article class="card">
             <h2>Reseñas</h2>
             <p>Registra tu experiencia y conoce el promedio de calificaciones.</p>

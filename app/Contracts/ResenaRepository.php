@@ -8,4 +8,6 @@ interface ResenaRepository
     // Obtiene las calificaciones de las reseñas.
     // El resultado siempre debe ser un arreglo.
     public function obtenerCalificaciones(): array;
+
+    public function obtenerCalificacionesPorSitio(int $sitioId): array;
 }

@@ -16,7 +16,7 @@
             </a>
             <nav class="main-nav" aria-label="Principal">
                 <a href="{{ route('aforo.index') }}" data-cy="nav-aforo">Aforo</a>
-                <a href="{{ url('/resenas') }}" data-cy="nav-resenas">Reseñas</a>
+                <a href="{{ route('resenas.index') }}" data-cy="nav-resenas">Reseñas</a>
                 <a href="{{ url('/operatividad') }}" data-cy="nav-operatividad">Operatividad</a>
                 <a href="{{ url('/transporte') }}" data-cy="nav-transporte">Transporte</a>
             </nav>
