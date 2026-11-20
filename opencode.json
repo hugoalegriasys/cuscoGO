@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    },
+    "edit": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "opencode.json": "deny",
+      "AGENTS.md": "ask",
+      "phpunit.xml": "ask",
+      "composer.json": "ask",
+      "composer.lock": "ask",
+      "package.json": "ask",
+      "bootstrap/app.php": "ask",
+      "config/*": "ask",
+      "database/migrations/*": "ask",
+      "docs/historias/*": "ask"
+    },
+    "bash": {
+      "*": "ask",
+      "php artisan test*": "allow",
+      "php artisan route:list*": "allow",
+      "php artisan make:*": "allow",
+      "php artisan migrate*": "ask",
+      "php artisan migrate:fresh*": "deny",
+      "php artisan migrate:reset*": "deny",
+      "php artisan db:wipe*": "deny",
+      "composer require*": "ask",
+      "composer update*": "ask",
+      "composer remove*": "ask",
+      "npm install*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git add*": "allow",
+      "git commit*": "ask",
+      "git checkout*": "ask",
+      "git switch*": "ask",
+      "git checkout main*": "deny",
+      "git switch main*": "deny",
+      "git push*": "deny",
+      "git merge*": "deny",
+      "git rebase*": "deny",
+      "git reset*": "deny",
+      "git clean*": "deny",
+      "git branch -D*": "deny",
+      "rm *": "deny",
+      "del *": "deny",
+      "rmdir *": "deny",
+      "rd *": "deny",
+      "Remove-Item*": "deny"
+    },
+    "webfetch": "ask"
+  }
+}

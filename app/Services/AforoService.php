@@ -11,30 +11,29 @@ class AforoService
     {
     }
 
-     //Calcula el nivel de aforo en tiempo real utilizando datos de sensores.
     public function calcularNivelAforo(string $sitioId): string
     {
-        // Obtenemos los datos a través de nuestra dependencia inyectada (el mock en las pruebas)
         $capacidad = $this->sensor->getCapacidad($sitioId);
         $ocupacion = $this->sensor->getOcupacion($sitioId);
 
-        // Validamos el escenario de error de la tabla
-        if ($ocupacion > $capacidad) {
-            throw new InvalidArgumentException('Error: La ocupación supera la capacidad máxima.');
+        if ($capacidad <= 0) {
+            throw new InvalidArgumentException('La capacidad debe ser mayor a cero.');
         }
 
-        // Calculamos el porcentaje de ocupación
+        if ($ocupacion > $capacidad) {
+            throw new InvalidArgumentException('La ocupación supera la capacidad máxima.');
+        }
+
         $porcentaje = ($ocupacion / $capacidad) * 100;
 
-        // Evaluamos según los umbrales deducidos de la historia de usuario
-        if ($porcentaje <= 50) {
+        if ($porcentaje <= 40) {
             return 'Bajo';
-        } 
-        
-        if ($porcentaje <= 80) {
+        }
+
+        if ($porcentaje <= 75) {
             return 'Moderado';
-        } 
-        
+        }
+
         return 'Alto';
     }
 }

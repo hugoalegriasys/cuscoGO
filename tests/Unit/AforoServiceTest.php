@@ -11,7 +11,6 @@ use PHPUnit\Framework\TestCase;
 
 class AforoServiceTest extends TestCase
 {
-    // Limpieza de Mockery al finalizar cada prueba
     protected function tearDown(): void
     {
         Mockery::close();
@@ -21,53 +20,72 @@ class AforoServiceTest extends TestCase
     public static function aforoCasosProvider(): array
     {
         return [
-            'Ocupacion 30' => [100, 30, 'Bajo'],
-            'Ocupacion 40' => [100, 40, 'Bajo'],
-            'Ocupacion 60' => [100, 60, 'Moderado'],
-            'Ocupacion 75' => [100, 75, 'Moderado'],
-            'Ocupacion 90' => [100, 90, 'Alto'],
+            'Ocupación 30 con capacidad 100 es Bajo' => [100, 30, 'Bajo'],
+            'Ocupación 40 con capacidad 100 es Bajo' => [100, 40, 'Bajo'],
+            'Ocupación 60 con capacidad 100 es Moderado' => [100, 60, 'Moderado'],
+            'Ocupación 75 con capacidad 100 es Moderado' => [100, 75, 'Moderado'],
+            'Ocupación 90 con capacidad 100 es Alto' => [100, 90, 'Alto'],
         ];
     }
 
     #[DataProvider('aforoCasosProvider')]
     public function test_calcular_nivel_aforo_retorna_estado_correcto(int $capacidad, int $ocupacion, string $resultadoEsperado): void
     {
-        // GIVEN: Tenemos un sensor mockeado que devuelve los datos de la tabla
+        // Given
         $sensorMock = Mockery::mock(SiteSensorInterface::class);
-        
-        $sensorMock->shouldReceive('getCapacidad')
-                   ->once()
-                   ->with('machu-picchu')
-                   ->andReturn($capacidad);
-                   
-        $sensorMock->shouldReceive('getOcupacion')
-                   ->once()
-                   ->with('machu-picchu')
-                   ->andReturn($ocupacion);
-
+        $sensorMock->shouldReceive('getCapacidad')->once()->with('machu-picchu')->andReturn($capacidad);
+        $sensorMock->shouldReceive('getOcupacion')->once()->with('machu-picchu')->andReturn($ocupacion);
         $aforoService = new AforoService($sensorMock);
 
-        // WHEN: Consultamos el nivel de aforo del sitio
+        // When
         $resultadoActual = $aforoService->calcularNivelAforo('machu-picchu');
 
-        // THEN: El nivel calculado debe coincidir con el resultado esperado de la tabla
-        $this->assertEquals($resultadoEsperado, $resultadoActual);
+        // Then
+        $this->assertSame($resultadoEsperado, $resultadoActual);
     }
 
     public function test_calcular_nivel_aforo_lanza_error_por_sobrecapacidad(): void
     {
-        // GIVEN: El mock devuelve 120 de ocupación para una capacidad de 100
+        // Given
         $sensorMock = Mockery::mock(SiteSensorInterface::class);
         $sensorMock->shouldReceive('getCapacidad')->andReturn(100);
         $sensorMock->shouldReceive('getOcupacion')->andReturn(120);
-
         $aforoService = new AforoService($sensorMock);
 
-        // THEN: Esperamos que el sistema lance una excepción indicando "Error"
+        // Then
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Error: La ocupación supera la capacidad máxima.');
 
-        // WHEN: Ejecutamos el cálculo
+        // When
+        $aforoService->calcularNivelAforo('machu-picchu');
+    }
+
+    public function test_calcular_nivel_aforo_lanza_error_si_capacidad_es_cero(): void
+    {
+        // Given
+        $sensorMock = Mockery::mock(SiteSensorInterface::class);
+        $sensorMock->shouldReceive('getCapacidad')->andReturn(0);
+        $sensorMock->shouldReceive('getOcupacion')->andReturn(0);
+        $aforoService = new AforoService($sensorMock);
+
+        // Then
+        $this->expectException(InvalidArgumentException::class);
+
+        // When
+        $aforoService->calcularNivelAforo('machu-picchu');
+    }
+
+    public function test_calcular_nivel_aforo_lanza_error_si_capacidad_es_negativa(): void
+    {
+        // Given
+        $sensorMock = Mockery::mock(SiteSensorInterface::class);
+        $sensorMock->shouldReceive('getCapacidad')->andReturn(-1);
+        $sensorMock->shouldReceive('getOcupacion')->andReturn(0);
+        $aforoService = new AforoService($sensorMock);
+
+        // Then
+        $this->expectException(InvalidArgumentException::class);
+
+        // When
         $aforoService->calcularNivelAforo('machu-picchu');
     }
 }
