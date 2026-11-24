@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    /*
+     |--------------------------------------------------------------------------
+     | Sensor IoT de aforo (CUS-06)
+     |--------------------------------------------------------------------------
+     | base_url se usa con Http::baseUrl(), por lo que el cliente solo debe
+     | indicar la ruta relativa /sensores/{id}/aforo. El valor por defecto
+     | apunta al entorno local de pruebas; en producción se sobrescribe con
+     | IOT_SENSOR_BASE_URL sin tocar código.
+     */
+    'iot_sensor' => [
+        'base_url' => env('IOT_SENSOR_BASE_URL', 'https://iot.cuscogo.local/api'),
+    ],
+
 ];

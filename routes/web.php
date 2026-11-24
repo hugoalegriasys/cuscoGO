@@ -5,13 +5,28 @@ declare(strict_types=1);
 use App\Http\Controllers\CercaniaController;
 use App\Http\Controllers\DisponibilidadController;
 use App\Http\Controllers\SitioPatrimonialController;
+use App\Http\Controllers\TelemetriaController;
 use App\Http\Controllers\TransporteController;
+use App\Models\Sitio;
 use App\Models\SitioPatrimonial;
+use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Route;
 
-// Vincula explícitamente el parámetro de ruta {sitio} con el modelo SitioPatrimonial,
-// dado que el nombre del parámetro no coincide con el nombre corto de la clase.
-Route::model('sitio', SitioPatrimonial::class);
+/*
+ * El nombre {sitio} se usa en dos dominios: el catálogo patrimonial (CUS-03)
+ * y la telemetría IoT (CUS-06). Un Route::model() global devolvería siempre
+ * SitioPatrimonial y rompería la API; por eso el binding examina la URI de
+ * la ruta y elige el modelo correcto en cada caso.
+ */
+Route::bind('sitio', static function (string $valor, RoutingRoute $ruta): Sitio|SitioPatrimonial {
+    $uri = $ruta->uri();
+
+    if (str_starts_with($uri, 'api/sitios/') && str_ends_with($uri, '/telemetria')) {
+        return Sitio::query()->findOrFail($valor);
+    }
+
+    return SitioPatrimonial::query()->findOrFail($valor);
+});
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,6 +46,10 @@ Route::prefix('sitios')->name('sitios.')->group(function (): void {
         ->name('disponibilidad.index');
     Route::post('/disponibilidad/evaluar', [DisponibilidadController::class, 'evaluar'])
         ->name('disponibilidad.evaluar');
+
+    // Panel de telemetría (CUS-06): consulta real o demo de resiliencia.
+    Route::get('/telemetria', [TelemetriaController::class, 'index'])
+        ->name('telemetria.index');
 });
 
 /*

@@ -14,8 +14,15 @@ class Sitio extends Model
 
     protected $table = 'sitios';
 
+    /*
+     * slug y sensor_id se asignan en masa desde seeders y factories (CUS-06).
+     * sensor_id es el puente con el proveedor IoT; usamos su valor tal cual
+     * para construir la URL /sensores/{sensorId}/aforo del cliente HTTP.
+     */
     protected $fillable = [
         'nombre',
+        'slug',
+        'sensor_id',
         'categoria',
         'ubicacion',
         'latitud',
@@ -44,6 +51,17 @@ class Sitio extends Model
     public function horarios(): HasMany
     {
         return $this->hasMany(HorarioAtencion::class);
+    }
+
+    /**
+     * Histórico de telemetría del sitio (CUS-06).
+     *
+     * La relación permite consultar las lecturas desde el modelo y, sobre
+     * todo, sirve de respaldo cuando el sensor IoT no responde.
+     */
+    public function aforoLecturas(): HasMany
+    {
+        return $this->hasMany(AforoLectura::class);
     }
 
     public function horariosActivos(): HasMany

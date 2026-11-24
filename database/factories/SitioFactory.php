@@ -21,6 +21,13 @@ class SitioFactory extends Factory
     {
         return [
             'nombre' => fake()->unique()->company(),
+            /*
+             * slug y sensor_id son únicos: unique() del generador evita
+             * colisiones entre sitios creados en la misma prueba y que el
+             * fallback lea la lectura de otro sensor por error (CUS-06).
+             */
+            'slug' => fake()->unique()->slug(2),
+            'sensor_id' => sprintf('SN-%03d', fake()->unique()->numberBetween(1, 999)),
             'categoria' => fake()->randomElement(['Arqueologico', 'Religioso', 'Museo', 'Natural']),
             'ubicacion' => fake()->address(),
             'latitud' => fake()->randomFloat(7, -13.5467, -13.4867),
