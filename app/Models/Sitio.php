@@ -18,6 +18,8 @@ class Sitio extends Model
         'nombre',
         'categoria',
         'ubicacion',
+        'latitud',
+        'longitud',
         'descripcion',
         'activo',
     ];
@@ -33,6 +35,9 @@ class Sitio extends Model
     {
         return [
             'activo' => 'boolean',
+            'latitud' => 'float',
+            'longitud' => 'float',
+            'distancia_km' => 'float',
         ];
     }
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\CercaniaController;
 use App\Http\Controllers\DisponibilidadController;
 use App\Http\Controllers\SitioPatrimonialController;
 use App\Http\Controllers\TransporteController;
@@ -17,6 +18,15 @@ Route::get('/', function () {
 });
 
 Route::prefix('sitios')->name('sitios.')->group(function (): void {
+    /*
+     * Búsqueda por cercanía (CUS-05): el listado se calcula en servidor
+     * con Haversine y se muestra ordenado por distancia en la misma vista.
+     */
+    Route::get('/cercanos', [CercaniaController::class, 'index'])
+        ->name('cercanos');
+    Route::post('/cercanos', [CercaniaController::class, 'buscarWeb'])
+        ->name('cercanos.buscar');
+
     Route::get('/disponibilidad', [DisponibilidadController::class, 'index'])
         ->name('disponibilidad.index');
     Route::post('/disponibilidad/evaluar', [DisponibilidadController::class, 'evaluar'])
