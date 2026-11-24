@@ -29,7 +29,7 @@
                         <path d="M3 19h18M5 15h14M7 11h10M9 7h6M11 3h2" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </span>
-                <span class="font-headline-md text-headline-md tracking-tight text-[#0F3D2E]">Cusco<span class="font-normal italic text-[#A0401D]">Go</span></span>
+                <span class="font-headline-md text-headline-md tracking-tight text-[#0F3D2E]">Cusco<span class="font-normal italic text-secondary">Go</span></span>
             </a>
             <div class="inline-flex items-center gap-2 rounded-full border border-[#E6DED2] bg-white px-3 py-1.5 font-label-sm text-label-sm tracking-wide text-[#5A665D]">
                 <span class="h-1.5 w-1.5 rounded-full bg-[#0F3D2E] animate-pulse"></span>
@@ -41,7 +41,7 @@
     <main class="min-h-[calc(100vh-80px)] w-full bg-[#FAF6F0] pt-20">
         <div class="mx-auto max-w-275 px-6 py-8">
             <header class="flex w-full flex-col items-start pb-6 pt-1">
-                <p class="font-label-md text-label-md uppercase tracking-wider text-[#A0401D]">CUS-06 · Telemetría IoT y Resiliencia de Aforo</p>
+                <p class="font-label-md text-label-md uppercase tracking-wider text-secondary">CUS-06 · Telemetría IoT y Resiliencia de Aforo</p>
                 <h1 class="mt-3 max-w-3xl text-left font-headline-lg text-headline-lg tracking-tight text-[#0F3D2E]">Aforo en tiempo real, incluso cuando el sensor calla</h1>
                 <p class="mt-2 max-w-2xl text-body-lg text-[#5A665D]">Elige un sitio con sensor IoT. Si el proveedor falla, el sistema muestra la última lectura registrada y la etiqueta como respaldo histórico.</p>
             </header>
@@ -101,7 +101,7 @@
                                 type="submit"
                                 id="btn-consultar"
                                 data-cy="btn-consultar"
-                                class="flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#0F3D2E] px-6 py-3.5 font-label-lg text-label-lg uppercase tracking-wider text-white shadow-sm transition-all duration-200 hover:bg-[#1E4D3B] hover:shadow active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                                class="flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#0F3D2E] px-6 py-3.5 font-label-lg text-label-lg uppercase tracking-wider text-white shadow-sm transition-all duration-200 hover:bg-primary-container hover:shadow active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 <svg id="spinner" class="hidden h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -124,7 +124,7 @@
                             </div>
 
                             <div class="rounded-xl border border-[#F0C2AE] bg-[#FDF1EC] p-8 text-center">
-                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#A0401D] shadow-sm">
+                                <div class="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-secondary shadow-sm">
                                     <span class="material-symbols-outlined text-[28px]">warning</span>
                                 </div>
                                 <span class="inline-flex items-center gap-2 rounded-full bg-[#8C2F12] px-4 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white shadow-sm">
@@ -160,7 +160,7 @@
 
                                 {{-- Badge de origen: comunica si el dato es vivo, de caché o histórico. --}}
                                 <span data-cy="badge-origen" class="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-label-sm text-label-sm uppercase tracking-widest text-white {{ $resultado['origen'] === 'fallback_bd' ? 'bg-[#8C2F12]' : 'bg-[#0F3D2E]' }}">
-                                    <span class="h-1.5 w-1.5 rounded-full {{ $resultado['origen'] === 'fallback_bd' ? 'bg-[#FFD8C9]' : 'bg-[#BBEED5]' }}"></span>
+                                    <span class="h-1.5 w-1.5 rounded-full {{ $resultado['origen'] === 'fallback_bd' ? 'bg-[#FFD8C9]' : 'bg-primary-fixed' }}"></span>
                                     {{ $etiquetaOrigen }}
                                 </span>
 
@@ -184,7 +184,7 @@
                                         aria-valuemin="0"
                                         aria-valuemax="100"
                                         aria-valuenow="{{ (int) $resultado['ocupacion'] }}"
-                                        class="h-full rounded-full transition-all duration-500 {{ $resultado['ocupacion'] > 80 ? 'bg-[#A0401D]' : 'bg-[#0F3D2E]' }}"
+                                        class="h-full rounded-full transition-all duration-500 {{ $resultado['ocupacion'] > 80 ? 'bg-secondary' : 'bg-[#0F3D2E]' }}"
                                         style="width: {{ (int) $resultado['ocupacion'] }}%"
                                     ></div>
                                 </div>
