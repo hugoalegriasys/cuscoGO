@@ -9,12 +9,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Contracts\DisponibilidadServiceInterface;
 use App\Services\DisponibilidadService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class DisponibilidadModelTest extends TestCase
 {
@@ -30,8 +30,9 @@ class DisponibilidadModelTest extends TestCase
     }
 
     /**
-     * Propósito: Verificar que Laravel resuelva el contrato con la implementación correcta.
-     * Escenario: app()->make(DisponibilidadServiceInterface) con 10:00/08:00-17:00 -> DisponibilidadService y true.
+     * Given: Laravel tiene enlazado DisponibilidadServiceInterface y la hora actual es 10:00 dentro del horario 08:00-17:00.
+     * When: Se resuelve el servicio desde el contenedor y se llama a estaOperativo('10:00', '08:00', '17:00').
+     * Then: La instancia obtenida es DisponibilidadService y el resultado es true.
      * Importancia: Previene fallos de binding en producción que las pruebas unitarias no detectan.
      */
     #[Test]
@@ -51,8 +52,9 @@ class DisponibilidadModelTest extends TestCase
     }
 
     /**
-     * Propósito: Confirmar que el servicio inyectado por el container mantenga sus validaciones.
-     * Escenario: hora '-05:00' -> InvalidArgumentException.
+     * Given: El servicio resuelto desde el container recibe una hora actual inválida '-05:00' con horario 08:00-17:00.
+     * When: Se intenta evaluar la operatividad con estaOperativo('-05:00', '08:00', '17:00').
+     * Then: Se lanza InvalidArgumentException, manteniendo la validación en el flujo de integración.
      * Importancia: Evita que una mala configuración del contenedor permita evaluaciones inválidas.
      */
     #[Test]

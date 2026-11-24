@@ -29,6 +29,11 @@ class AforoModelTest extends TestCase
         ];
     }
 
+    /**
+     * Given: El sensor simulado devuelve capacidad 100 y ocupación de 30, 50, 60, 80, 90 o 100 para "machu-picchu".
+     * When: Se resuelve AforoService desde el contenedor IoC y se calcula el nivel con calcularNivelAforo('machu-picchu').
+     * Then: El nivel es "Bajo" hasta 50%, "Moderado" hasta 80% y "Alto" desde 90% hasta 100%.
+     */
     #[DataProvider('aforoCasosProvider')]
     public function test_calcular_nivel_aforo_retorna_estado_correcto_mediante_ioc(int $capacidad, int $ocupacion, string $resultadoEsperado): void
     {
@@ -47,6 +52,11 @@ class AforoModelTest extends TestCase
         $this->assertEquals($resultadoEsperado, $resultadoActual);
     }
 
+    /**
+     * Given: El sensor simulado registra capacidad 100 y ocupación 120 para "Qoricancha".
+     * When: Se resuelve AforoService por IoC y se calcula el nivel de ese sitio.
+     * Then: Se lanza InvalidArgumentException con "Error: La ocupación supera la capacidad máxima."
+     */
     public function test_calcular_nivel_aforo_lanza_error_por_sobrecapacidad(): void
     {
         // Given: Mock con sobrecapacidad registrado en el contenedor IoC
@@ -65,6 +75,11 @@ class AforoModelTest extends TestCase
         $aforoService->calcularNivelAforo('Qoricancha');
     }
 
+    /**
+     * Given: El sensor simulado registra capacidad 100 y ocupación -5 para "machu-picchu".
+     * When: Se calcula el nivel de aforo con el servicio resuelto desde el contenedor IoC.
+     * Then: Se lanza InvalidArgumentException con "Error: La ocupación no puede ser negativa."
+     */
     public function test_lanza_excepcion_si_ocupacion_es_negativa(): void
     {
         // Given: Mock con valor negativo registrado en el contenedor IoC
@@ -83,6 +98,11 @@ class AforoModelTest extends TestCase
         $aforoService->calcularNivelAforo('machu-picchu');
     }
 
+    /**
+     * Given: El sensor simulado registra capacidad 0 y ocupación 10 para "machu-picchu".
+     * When: Se calcula el nivel de aforo con el servicio resuelto desde el contenedor IoC.
+     * Then: Se lanza InvalidArgumentException con "Error: La capacidad máxima debe ser mayor a cero."
+     */
     public function test_lanza_excepcion_si_capacidad_es_invalida(): void
     {
         // Given: Mock con capacidad cero registrado en el contenedor IoC

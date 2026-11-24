@@ -43,8 +43,9 @@ const calcular = (tipo, pasajeros, precio) => {
 
 describe('CUS-04: Cálculo del Costo del Transporte Turístico', () => {
     /**
-     * Propósito: Recorrer en el navegador la cotización de bus colectivo por pasajero.
-     * Escenario: Elegir BUS_COLECTIVO, 2 pasajeros y S/ 35 -> badge "COBRO POR PASAJERO" y total "S/ 70.00".
+     * Given: El navegador abre el formulario de cálculo en /transporte/calcular con la ruta, el tipo, los pasajeros y el precio visibles.
+     * When: El usuario elige BUS_COLECTIVO, escribe 2 pasajeros y S/ 35, y pulsa Calcular.
+     * Then: La tarjeta muestra el badge "COBRO POR PASAJERO", el total "S/ 70.00" y el mensaje "Bus Colectivo".
      * Importancia: Comprueba que el formulario envía, el servidor responde y la tarjeta se actualiza de verdad.
      */
     it('CA-01: calcula el costo de BUS_COLECTIVO por pasajero', () => {
@@ -59,8 +60,9 @@ describe('CUS-04: Cálculo del Costo del Transporte Turístico', () => {
     });
 
     /**
-     * Propósito: Verificar visualmente que el servicio privado ignora la cantidad de pasajeros.
-     * Escenario: Elegir PRIVADO, 3 pasajeros y S/ 150 -> badge "TARIFA FIJA POR VEHÍCULO" y total "S/ 150.00".
+     * Given: El formulario de cálculo está abierto y el selector de tipo de servicio permite elegir el servicio privado.
+     * When: El usuario elige PRIVADO, escribe 3 pasajeros y S/ 150, y pulsa Calcular.
+     * Then: La tarjeta muestra el badge "TARIFA FIJA POR VEHÍCULO" y el total "S/ 150.00" sin multiplicar por los pasajeros.
      * Importancia: Previene que el usuario vea un sobrecobro aunque la lógica unitaria sea correcta.
      */
     it('CA-02: calcula PRIVADO como tarifa fija por vehículo', () => {
@@ -74,8 +76,9 @@ describe('CUS-04: Cálculo del Costo del Transporte Turístico', () => {
     });
 
     /**
-     * Propósito: Probar el atajo de ruta turística y su JavaScript de autorrelleno.
-     * Escenario: Seleccionar la ruta "tren" -> TREN y 220.00 en los campos; con 2 pasajeros -> "S/ 440.00".
+     * Given: El formulario de cálculo está abierto y el selector rápido de ruta ofrece la opción "tren".
+     * When: El usuario selecciona la ruta "tren" (que autorrellena TREN y 220.00), escribe 2 pasajeros y pulsa Calcular.
+     * Then: La tarjeta muestra el resultado con el total "S/ 440.00".
      * Importancia: Detecta scripts roto o atributos data-* desalineados que dejarían al usuario completando todo a mano.
      */
     it('CA-03: autorrellena modalidad y tarifa con el selector rápido de ruta', () => {
@@ -93,8 +96,9 @@ describe('CUS-04: Cálculo del Costo del Transporte Turístico', () => {
     });
 
     /**
-     * Propósito: Confirmar que un error de validación se comunica visualmente en la tarjeta derecha.
-     * Escenario: BUS_COLECTIVO con 0 pasajeros -> badge "ERROR DE VALIDACIÓN" y mensaje exacto de pasajeros.
+     * Given: El formulario de cálculo está abierto y la tarjeta derecha espera el resultado de la cotización.
+     * When: El usuario elige BUS_COLECTIVO, escribe 0 pasajeros y S/ 35, y pulsa Calcular.
+     * Then: La tarjeta muestra el badge "ERROR DE VALIDACIÓN" y el mensaje "La cantidad de pasajeros debe ser mayor a cero".
      * Importancia: Evita que el formulario parezca no hacer nada o que el mensaje quede solo en la consola.
      */
     it('CA-04: muestra error de validación con pasajeros en cero', () => {

@@ -34,45 +34,48 @@ class TelemetriaAforoServiceTest extends TestCase
     {
         parent::setUp();
 
-        // Preparación: cada caso empieza con una caché vacía para que el
+        // Given: cada caso empieza con una caché vacía para que el
         // resultado no dependa del orden en que PHPUnit ejecute los métodos.
         Cache::flush();
     }
 
     /**
-     * Propósito: Validar que el cliente extrae la ocupación de un payload válido.
-     * Escenario: GET /sensores/MP-01/aforo responde {"ocupacion": 85} con HTTP 200.
+     * Given: GET /sensores/MP-01/aforo responde {"ocupacion": 85} con HTTP 200.
+     * When: se obtiene la lectura del sensor MP-01 con el cliente HTTP.
+     * Then: se devuelve 85 como entero y la petición se envió a /sensores/MP-01/aforo.
      * Importancia: Fija el contrato entre el proveedor IoT y nuestro DTO.
      */
     public function test_cliente_devuelve_ocupacion_de_respuesta_valida(): void
     {
-        // Preparación: Http::fake() sustituye el transporte real por esta respuesta.
+        // Given: Http::fake() sustituye el transporte real por esta respuesta.
         Http::fake([
             '*' => Http::response(['ocupacion' => 85], 200),
         ]);
 
-        // Ejecución: resolvemos el cliente desde el contenedor, igual que la app.
+        // When: resolvemos el cliente desde el contenedor, igual que la app.
         $cliente = app(SiteSensorClientInterface::class);
         $ocupacion = $cliente->obtenerLecturaSensor('MP-01');
 
-        // Verificación: el valor es entero y la URL contiene el código del sensor.
+        // Then: el valor es entero y la URL contiene el código del sensor.
         $this->assertSame(85, $ocupacion);
         Http::assertSent(static fn (Request $peticion): bool => str_contains($peticion->url(), '/sensores/MP-01/aforo'));
     }
 
     /**
-     * Propósito: Convertir un HTTP 500 del proveedor en error de dominio.
-     * Escenario: El sensor responde 500 después de los reintentos configurados.
+     * Given: el sensor responde HTTP 500 después de los reintentos configurados.
+     * When: se solicita la lectura del sensor MP-01 con el cliente HTTP.
+     * Then: se lanza SensorNoDisponibleException con código 503.
      * Importancia: Es la señal que activa el fallback en el servicio de resiliencia.
      */
     public function test_cliente_lanza_excepcion_ante_http_500(): void
     {
-        // Preparación: throw:false evita RequestException; el cliente detecta !successful().
+        // Given: throw:false evita RequestException; el cliente detecta !successful().
         Http::fake([
             '*' => Http::response(['error' => 'sensor caído'], 500),
         ]);
 
-        // Ejecución y verificación: debe lanzar SensorNoDisponibleException con código 503.
+        // When: se configura la excepción esperada y se solicita la lectura del sensor MP-01.
+        // Then: debe lanzar SensorNoDisponibleException con código 503.
         $this->expectException(SensorNoDisponibleException::class);
         $this->expectExceptionCode(503);
 
@@ -80,18 +83,20 @@ class TelemetriaAforoServiceTest extends TestCase
     }
 
     /**
-     * Propósito: Cubrir un timeout de conexión, no solo un código HTTP de error.
-     * Escenario: Http::fake() lanza ConnectionException al intentar conectar.
+     * Given: Http::fake() lanza ConnectionException al intentar conectar con el sensor.
+     * When: se solicita la lectura del sensor MP-01 con el cliente HTTP.
+     * Then: se lanza SensorNoDisponibleException con código 503 en lugar de un error sin controlar.
      * Importancia: Un sensor que nunca responde no debe provocar un 500 sin controlar.
      */
     public function test_cliente_lanza_excepcion_ante_timeout(): void
     {
-        // Preparación: una excepción de conexión simula el timeout de 3 segundos.
+        // Given: una excepción de conexión simula el timeout de 3 segundos.
         Http::fake(static function (): never {
             throw new ConnectionException('Timeout simulado del sensor.');
         });
 
-        // Ejecución y verificación: el cliente la traduce a nuestra excepción.
+        // When: se configura la excepción esperada y se solicita la lectura del sensor MP-01.
+        // Then: el cliente la traduce a nuestra excepción.
         $this->expectException(SensorNoDisponibleException::class);
         $this->expectExceptionCode(503);
 
@@ -99,13 +104,14 @@ class TelemetriaAforoServiceTest extends TestCase
     }
 
     /**
-     * Propósito: Confirmar que ante caída del sensor se usa la última lectura guardada.
-     * Escenario: Sensor HTTP 500 y lectura histórica de 70 en aforo_lecturas.
+     * Given: el sensor responde HTTP 500 y aforo_lecturas guarda una lectura de 70 de hace un minuto para Machu Picchu (MP-01).
+     * When: se obtiene el aforo con fallback del sitio Machu Picchu.
+     * Then: se devuelve la ocupación histórica 70 con stale=true y origen fallback_bd.
      * Importancia: stale=true informa de que el dato es válido pero no en vivo.
      */
     public function test_fallback_devuelve_ultima_lectura_con_stale_true(): void
     {
-        // Preparación: sitio con sensor y una lectura previa de hace un minuto.
+        // Given: sitio con sensor y una lectura previa de hace un minuto.
         $sitio = Sitio::factory()->create(['nombre' => 'Machu Picchu', 'sensor_id' => 'MP-01']);
         AforoLectura::query()->create([
             'sitio_id' => $sitio->id,
@@ -116,27 +122,29 @@ class TelemetriaAforoServiceTest extends TestCase
         ]);
         Http::fake(['*' => Http::response(['error' => 'sin señal'], 500)]);
 
-        // Ejecución: el servicio intenta el sensor y cae al respaldo en BD.
+        // When: el servicio intenta el sensor y cae al respaldo en BD.
         $dto = app(TelemetriaAforoServiceInterface::class)->obtenerAforoConFallback($sitio);
 
-        // Verificación: ocupación histórica, stale=true y origen fallback_bd.
+        // Then: ocupación histórica, stale=true y origen fallback_bd.
         $this->assertSame(70, $dto->ocupacion);
         $this->assertTrue($dto->stale);
         $this->assertSame('fallback_bd', $dto->origen);
     }
 
     /**
-     * Propósito: Evitar devolver un dato inventado cuando no existe respaldo.
-     * Escenario: Sensor caído y tabla aforo_lecturas vacía para ese sitio.
+     * Given: el sensor está caído (HTTP 500) y aforo_lecturas no tiene lecturas para Machu Picchu (MP-01).
+     * When: se obtiene el aforo con fallback de ese sitio sin histórico persistido.
+     * Then: se propaga SensorNoDisponibleException con código 503 y código de error SENSOR_NO_DISPONIBLE.
      * Importancia: El HTTP 503 es la respuesta honesta cuando no hay nada que mostrar.
      */
     public function test_fallback_relanza_excepcion_sin_lecturas_previas(): void
     {
-        // Preparación: sitio con sensor, pero sin histórico persistido.
+        // Given: sitio con sensor, pero sin histórico persistido.
         $sitio = Sitio::factory()->create(['nombre' => 'Machu Picchu', 'sensor_id' => 'MP-01']);
         Http::fake(['*' => Http::response(['error' => 'sin señal'], 500)]);
 
-        // Ejecución y verificación: se propaga la excepción original con código 503.
+        // When: se consulta el servicio de aforo con fallback para el sitio sin histórico.
+        // Then: se propaga la excepción original con código 503.
         try {
             app(TelemetriaAforoServiceInterface::class)->obtenerAforoConFallback($sitio);
             $this->fail('Se esperaba SensorNoDisponibleException.');
@@ -147,23 +155,24 @@ class TelemetriaAforoServiceTest extends TestCase
     }
 
     /**
-     * Propósito: Comprobar la persistencia en vivo y la caché de 15 segundos.
-     * Escenario: Dos consultas consecutivas al mismo sitio con sensor activo.
+     * Given: el sensor MP-01 de Machu Picchu está activo y responde {"ocupacion": 85} con HTTP 200.
+     * When: se consulta dos veces seguidas el aforo del mismo sitio, la segunda dentro de la ventana de caché de 15 segundos.
+     * Then: la primera respuesta es iot_vivo y sin stale, la segunda viene de cache con ocupación 85 y sin stale, con una sola petición HTTP y una sola lectura guardada.
      * Importancia: Http::assertSentCount(1) demuestra que la segunda consulta no
      * saturó al proveedor y que solo se guardó una lectura en la BD.
      */
     public function test_lectura_exitosa_se_persiste_y_se_sirve_desde_cache(): void
     {
-        // Preparación: sensor activo con ocupación 85.
+        // Given: sensor activo con ocupación 85.
         Http::fake(['*' => Http::response(['ocupacion' => 85], 200)]);
         $sitio = Sitio::factory()->create(['nombre' => 'Machu Picchu', 'sensor_id' => 'MP-01']);
         $servicio = app(TelemetriaAforoServiceInterface::class);
 
-        // Ejecución: primera consulta en vivo y segunda dentro de la ventana de 15 s.
+        // When: primera consulta en vivo y segunda dentro de la ventana de 15 s.
         $primero = $servicio->obtenerAforoConFallback($sitio);
         $segundo = $servicio->obtenerAforoConFallback($sitio);
 
-        // Verificación: solo una petición HTTP, una fila guardada y origen cache.
+        // Then: solo una petición HTTP, una fila guardada y origen cache.
         $this->assertSame('iot_vivo', $primero->origen);
         $this->assertFalse($primero->stale);
         $this->assertSame('cache', $segundo->origen);

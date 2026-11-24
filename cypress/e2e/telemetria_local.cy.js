@@ -48,8 +48,9 @@ const consultar = (nombreSitio, modo) => {
 
 describe('CUS-06: Telemetría IoT y Resiliencia de Aforo', () => {
     /**
-     * Propósito: Comprobar que el panel se carga y arranca sin datos consultados.
-     * Escenario: GET /sitios/telemetria -> formulario, selector, modo, botón y estado vacío.
+     * Given: El navegador abre GET /sitios/telemetria sobre la base sembrada y muestra el formulario, el selector de sitio, el modo y el botón Consultar.
+     * When: El usuario deja el panel sin consultar ningún sitio y observa su estado inicial.
+     * Then: El modo queda en "vivo" con las opciones "En vivo" y "Fallback", se ve el estado vacío "Sin consulta todavía" y no aparecen resultado ni alerta HTTP 503.
      * Importancia: Detecta que la vista no compila o que faltan los data-cy del resto de casos.
      */
     it('CA-01: carga el panel de telemetría con su estado inicial', () => {
@@ -65,8 +66,9 @@ describe('CUS-06: Telemetría IoT y Resiliencia de Aforo', () => {
     });
 
     /**
-     * Propósito: Verificar la visualización del aforo en vivo y su barra visual.
-     * Escenario: Machu Picchu + modo demo "vivo" -> 85%, badge "En vivo (IoT)" y aria-valuenow 85.
+     * Given: El panel de telemetría está abierto y el selector de sitio ofrece Machu Picchu.
+     * When: El usuario elige Machu Picchu, selecciona el modo demo "vivo" y pulsa Consultar.
+     * Then: El resultado muestra 85%, el badge "En vivo (IoT)" y la barra con aria-valuenow 85, sin aviso stale ni alerta 503.
      * Importancia: Comprueba que el valor del DTO llega al texto y al progressbar sin divergencias.
      */
     it('CA-02: consulta el aforo en vivo y muestra el badge En vivo (IoT)', () => {
@@ -83,8 +85,9 @@ describe('CUS-06: Telemetría IoT y Resiliencia de Aforo', () => {
     });
 
     /**
-     * Propósito: Validar el estado degradado cuando el sensor pierde señal.
-     * Escenario: Qorikancha + modo demo "fallback" -> 45% histórico, badge de respaldo y aviso stale.
+     * Given: El panel de telemetría está abierto y el selector de sitio ofrece Qorikancha.
+     * When: El usuario elige Qorikancha, selecciona el modo demo "fallback" y pulsa Consultar.
+     * Then: El resultado muestra el 45% histórico, el badge "Fallback" con "Respaldo histórico" y el aviso "Sensor sin señal · Mostrando última lectura registrada", sin alerta 503.
      * Importancia: Asegura que el usuario entiende que el dato es real pero no reciente.
      */
     it('CA-03: muestra respaldo histórico con stale = true al caer el sensor', () => {
@@ -102,8 +105,9 @@ describe('CUS-06: Telemetría IoT y Resiliencia de Aforo', () => {
     });
 
     /**
-     * Propósito: Confirmar el error controlado cuando no existe histórico de respaldo.
-     * Escenario: Museo de Arte Religioso + modo "fallback" -> alerta HTTP 503 con SENSOR_NO_DISPONIBLE.
+     * Given: El panel de telemetría está abierto y el selector de sitio ofrece el Museo de Arte Religioso.
+     * When: El usuario elige el Museo de Arte Religioso, selecciona el modo "fallback" y pulsa Consultar.
+     * Then: Aparece la alerta HTTP 503 con SENSOR_NO_DISPONIBLE y no se muestra ningún resultado.
      * Importancia: Evita que una ausencia de datos parezca un fallo 500 del servidor.
      */
     it('CA-04: muestra alerta HTTP 503 cuando no hay lecturas previas', () => {

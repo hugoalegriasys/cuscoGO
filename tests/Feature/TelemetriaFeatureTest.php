@@ -32,27 +32,28 @@ class TelemetriaFeatureTest extends TestCase
         // Las vistas usan @vite; el manifest no es necesario en pruebas.
         $this->withoutVite();
 
-        // Preparación: sin caché residual entre casos de prueba.
+        // Given: sin caché residual entre casos de prueba.
         Cache::flush();
     }
 
     /**
-     * Propósito: Verificar el contrato JSON de éxito y la persistencia.
-     * Escenario: GET /api/sitios/{id}/telemetria con sensor activo (ocupación 85).
+     * Given: existe el sitio 'Machu Picchu' con sensor MP-01 y un proveedor IoT simulado con ocupación 85.
+     * When: se solicita GET /api/sitios/{id}/telemetria.
+     * Then: responde 200 con origen 'iot_vivo', stale false, ocupación 85 y una lectura guardada en aforo_lecturas.
      * Importancia: Detecta rutas mal enlazadas, bindings de modelo incorrectos y
      * fallos al guardar la lectura en aforo_lecturas.
      */
     #[Test]
     public function la_api_devuelve_aforo_en_vivo_y_lo_persiste(): void
     {
-        // Preparación: sitio con sensor y proveedor IoT simulado con Http::fake().
+        // Given: sitio con sensor y proveedor IoT simulado con Http::fake().
         $sitio = Sitio::factory()->create(['nombre' => 'Machu Picchu', 'sensor_id' => 'MP-01']);
         Http::fake(['*' => Http::response(['ocupacion' => 85], 200)]);
 
-        // Ejecución: petición HTTP real al endpoint de la API.
+        // When: petición HTTP real al endpoint de la API.
         $respuesta = $this->getJson(route('api.sitios.telemetria', $sitio));
 
-        // Verificación: HTTP 200, DTO sin stale y una lectura guardada.
+        // Then: HTTP 200, DTO sin stale y una lectura guardada.
         $respuesta->assertOk();
         $respuesta->assertJsonPath('data.sitio_id', $sitio->id);
         $respuesta->assertJsonPath('data.ocupacion', 85);
@@ -62,15 +63,16 @@ class TelemetriaFeatureTest extends TestCase
     }
 
     /**
-     * Propósito: Confirmar que la API degrada a histórico sin cambiar el código 200.
-     * Escenario: Sensor HTTP 500 y lectura previa de 70 en aforo_lecturas.
+     * Given: existe 'Qorikancha' con sensor QK-02, una lectura histórica de 70 y el sensor responde HTTP 500.
+     * When: se solicita GET /api/sitios/{id}/telemetria.
+     * Then: responde 200 con ocupación 70, origen 'fallback_bd' y stale=true.
      * Importancia: El cliente recibe un dato útil y la marca stale=true para no
      * confundirlo con una medición reciente.
      */
     #[Test]
     public function la_api_devuelve_respaldo_historico_con_stale_true(): void
     {
-        // Preparación: histórico de 70 y fallo del sensor.
+        // Given: histórico de 70 y fallo del sensor.
         $sitio = Sitio::factory()->create(['nombre' => 'Qorikancha', 'sensor_id' => 'QK-02']);
         AforoLectura::query()->create([
             'sitio_id' => $sitio->id,
@@ -81,10 +83,10 @@ class TelemetriaFeatureTest extends TestCase
         ]);
         Http::fake(['*' => Http::response(['error' => 'sin señal'], 500)]);
 
-        // Ejecución: la excepción del cliente se convierte en fallback.
+        // When: la excepción del cliente se convierte en fallback.
         $respuesta = $this->getJson(route('api.sitios.telemetria', $sitio));
 
-        // Verificación: HTTP 200 con el valor histórico y flag de degradación.
+        // Then: HTTP 200 con el valor histórico y flag de degradación.
         $respuesta->assertOk();
         $respuesta->assertJsonPath('data.ocupacion', 70);
         $respuesta->assertJsonPath('data.stale', true);
@@ -92,41 +94,43 @@ class TelemetriaFeatureTest extends TestCase
     }
 
     /**
-     * Propósito: Comprobar el HTTP 503 cuando no hay ningún dato de respaldo.
-     * Escenario: Sensor caído y base de datos sin lecturas para el sitio.
+     * Given: existe 'Machu Picchu' con sensor MP-01 caído y sin lecturas previas en la base de datos.
+     * When: se solicita GET /api/sitios/{id}/telemetria.
+     * Then: responde 503 con error 'SENSOR_NO_DISPONIBLE' y la estructura { message, error }.
      * Importancia: Fija el contrato de error { message, error } para integraciones.
      */
     #[Test]
     public function la_api_devuelve_503_sin_lecturas_previas(): void
     {
-        // Preparación: sitio sin histórico y sensor que falla.
+        // Given: sitio sin histórico y sensor que falla.
         $sitio = Sitio::factory()->create(['nombre' => 'Machu Picchu', 'sensor_id' => 'MP-01']);
         Http::fake(['*' => Http::response(['error' => 'sin señal'], 500)]);
 
-        // Ejecución: petición HTTP que debe terminar en error controlado.
+        // When: petición HTTP que debe terminar en error controlado.
         $respuesta = $this->getJson(route('api.sitios.telemetria', $sitio));
 
-        // Verificación: 503 y código de error estable.
+        // Then: 503 y código de error estable.
         $respuesta->assertStatus(503);
         $respuesta->assertJsonPath('error', 'SENSOR_NO_DISPONIBLE');
         $respuesta->assertJsonStructure(['message', 'error']);
     }
 
     /**
-     * Propósito: Asegurar que el panel web carga con sus selectores Cypress.
-     * Escenario: GET /sitios/telemetria sin parámetros de consulta.
+     * Given: existe 'Machu Picchu' con sensor MP-01 como opción del selector.
+     * When: se solicita GET /sitios/telemetria sin parámetros de consulta.
+     * Then: responde 200 con el título CUS-06, los selectores data-cy y el estado vacío inicial.
      * Importancia: Detecta vista que no compila, ruta ausente o data-cy renombrado.
      */
     #[Test]
     public function carga_la_vista_del_panel_de_telemetria(): void
     {
-        // Preparación: sitio con sensor para que exista opción en el selector.
+        // Given: sitio con sensor para que exista opción en el selector.
         Sitio::factory()->create(['nombre' => 'Machu Picchu', 'sensor_id' => 'MP-01']);
 
-        // Ejecución: carga inicial, sin consultar al proveedor IoT.
+        // When: carga inicial, sin consultar al proveedor IoT.
         $respuesta = $this->get(route('sitios.telemetria.index'));
 
-        // Verificación: HTTP 200, controles visibles y estado vacío inicial.
+        // Then: HTTP 200, controles visibles y estado vacío inicial.
         $respuesta->assertOk();
         $respuesta->assertSee('CUS-06 · Telemetría IoT y Resiliencia de Aforo');
         $respuesta->assertSee('data-cy="form-telemetria"', false);

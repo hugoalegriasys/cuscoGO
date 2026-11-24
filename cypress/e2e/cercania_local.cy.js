@@ -53,8 +53,9 @@ const distanciasMostradas = () => cy.get(SELECTOR_ITEM).then($items => {
 
 describe('CUS-05: Búsqueda de Sitios por Cercanía (Geolocalización / GPS)', () => {
     /**
-     * Propósito: Recorrer en el navegador la búsqueda desde la Plaza de Armas con radio de 5 km.
-     * Escenario: Preset "Plaza de Armas Cusco" (-13.5167, -71.9781) y radio 5 -> tarjetas ordenadas con badges 0.00, 0.50 y 0.86 km.
+     * Given: El navegador abre el formulario de cercanía en /sitios/cercanos con el preset de la Plaza de Armas disponible.
+     * When: El usuario pulsa el preset "Plaza de Armas Cusco" (-13.5167, -71.9781), elige el radio de 5 km y envía la búsqueda.
+     * Then: Se muestran tarjetas ordenadas por distancia con badges de 0.00, 0.50 y 0.86 km.
      * Importancia: Comprueba que el JavaScript del preset, el envío del formulario y el orden por distancia funcionan de verdad.
      */
     it('CA-01: lista sitios cercanos ordenados desde la Plaza de Armas', () => {
@@ -75,8 +76,9 @@ describe('CUS-05: Búsqueda de Sitios por Cercanía (Geolocalización / GPS)', (
     });
 
     /**
-     * Propósito: Verificar que al ampliar el radio aparecen destinos lejanos al final de la lista.
-     * Escenario: Radio 100 km desde Cusco -> Machu Picchu (72.86 km) incluido como último sitio.
+     * Given: El formulario de cercanía ya está cargado en el navegador y permite ampliar el radio desde Cusco.
+     * When: El usuario pulsa el preset "Plaza de Armas Cusco" (-13.5167, -71.9781), amplía el radio a 100 km y envía la búsqueda.
+     * Then: La lista incluye Machu Picchu como último sitio, con el badge 72.86 km, y el resto de distancias siguen ordenadas.
      * Importancia: Detecta un filtro de radio demasiado estrecho o un ORDER BY invertido en la consulta SQL.
      */
     it('CA-02: amplía el radio a 100 km e incluye Machu Picchu al final', () => {
@@ -93,8 +95,9 @@ describe('CUS-05: Búsqueda de Sitios por Cercanía (Geolocalización / GPS)', (
     });
 
     /**
-     * Propósito: Confirmar el mensaje de estado vacío cuando ningún sitio cae dentro del radio.
-     * Escenario: Punto alejado (0, 0) con radio 0.01 km -> "Sin resultados en este radio" y cero tarjetas.
+     * Given: El navegador muestra el formulario de cercanía, con el selector de radio preparado para evaluar el punto alejado (0, 0).
+     * When: El usuario escribe latitud 0 y longitud 0, selecciona el radio de 0.01 km y envía la búsqueda.
+     * Then: Se ve el estado vacío "Sin resultados en este radio" y no aparece ninguna tarjeta.
      * Importancia: Evita que una lista vacía parezca un error de carga o que se muestren sitios de otra región.
      */
     it('CA-03: muestra estado vacío con un radio de 0.01 km en un punto alejado', () => {
@@ -115,8 +118,9 @@ describe('CUS-05: Búsqueda de Sitios por Cercanía (Geolocalización / GPS)', (
     });
 
     /**
-     * Propósito: Comprobar que una latitud imposible se comunica visualmente al usuario.
-     * Escenario: Latitud -95.0000 -> alerta terracota con "La latitud debe estar entre -90 y 90 grados."
+     * Given: El navegador muestra el formulario de cercanía en /sitios/cercanos, listo para validar coordenadas.
+     * When: El usuario escribe la latitud -95.0000, mantiene la longitud -71.9781, elige el radio de 5 km y envía la búsqueda.
+     * Then: Aparece la alerta terracota "La latitud debe estar entre -90 y 90 grados." y no se muestran resultados.
      * Importancia: Evita que el formulario parezca no hacer nada o que el mensaje quede solo en la consola.
      */
     it('CA-04: muestra alerta de validación con latitud -95.0000', () => {

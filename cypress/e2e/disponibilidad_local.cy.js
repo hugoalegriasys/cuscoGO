@@ -55,8 +55,9 @@ const verificarResultadoDesplegado = () => {
 
 describe('CUS-03: Evaluación de Estado de Operatividad', () => {
     /**
-     * Propósito: Recorrer en el navegador la consulta ABIERTA con horario manual.
-     * Escenario: Hora 10:00 con horario 09:00-17:00 -> badge y mensaje "ABIERTO".
+     * Given: El navegador abre el formulario de disponibilidad en /sitios/disponibilidad con la hora actual, la apertura y el cierre visibles.
+     * When: El usuario escribe la hora 10:00, el horario 09:00-17:00 y pulsa Evaluar.
+     * Then: La tarjeta derecha muestra el badge y el mensaje "ABIERTO".
      * Importancia: Comprueba que el formulario envía, el servidor responde y la tarjeta se actualiza de verdad.
      */
     it('CA-01: muestra ABIERTO cuando la hora está dentro del horario', () => {
@@ -70,8 +71,9 @@ describe('CUS-03: Evaluación de Estado de Operatividad', () => {
     });
 
     /**
-     * Propósito: Verificar visualmente el estado CERRADO fuera del horario.
-     * Escenario: Hora 18:00 con horario 09:00-17:00 -> badge y mensaje "CERRADO".
+     * Given: El formulario de disponibilidad está cargado en el navegador, listo para comparar la hora con el horario.
+     * When: El usuario escribe la hora 18:00, el horario 09:00-17:00 y pulsa Evaluar.
+     * Then: La tarjeta derecha muestra el badge y el mensaje "CERRADO" porque el sitio ya cerró.
      * Importancia: Previene que el turista vea ABIERTO cuando el sitio ya cerró.
      */
     it('CA-02: muestra CERRADO cuando la hora está fuera del horario', () => {
@@ -85,8 +87,9 @@ describe('CUS-03: Evaluación de Estado de Operatividad', () => {
     });
 
     /**
-     * Propósito: Probar la frontera exacta de apertura en el navegador.
-     * Escenario: Hora 09:00 con apertura 09:00 -> ABIERTO.
+     * Given: El formulario de disponibilidad está abierto para probar la frontera exacta de apertura en el navegador.
+     * When: El usuario escribe la hora 09:00 con apertura 09:00 y cierre 17:00, y pulsa Evaluar.
+     * Then: La tarjeta derecha muestra el badge y el mensaje "ABIERTO" en la hora exacta de apertura.
      * Importancia: Detecta comparaciones estrictas que excluyan la hora de apertura.
      */
     it('CA-03a: muestra ABIERTO en la hora exacta de apertura', () => {
@@ -100,8 +103,9 @@ describe('CUS-03: Evaluación de Estado de Operatividad', () => {
     });
 
     /**
-     * Propósito: Probar la frontera exacta de cierre en el navegador.
-     * Escenario: Hora 17:00 con cierre 17:00 -> ABIERTO (límite inclusivo).
+     * Given: El formulario de disponibilidad está abierto para probar la frontera exacta de cierre en el navegador.
+     * When: El usuario escribe la hora 17:00 con apertura 09:00 y cierre 17:00, y pulsa Evaluar.
+     * Then: La tarjeta derecha muestra el badge y el mensaje "ABIERTO" en la hora exacta de cierre (límite inclusivo).
      * Importancia: Evita que la hora exacta de cierre se muestre como CERRADO por error de comparación.
      */
     it('CA-03b: muestra ABIERTO en la hora exacta de cierre', () => {
@@ -115,8 +119,9 @@ describe('CUS-03: Evaluación de Estado de Operatividad', () => {
     });
 
     /**
-     * Propósito: Confirmar que un error de validación se comunique visualmente en la tarjeta derecha.
-     * Escenario: Hora 10:00 con horario 18:00-09:00 -> badge "ERROR DE VALIDACIÓN" y mensaje de cierre posterior.
+     * Given: El formulario de disponibilidad está cargado y la tarjeta derecha espera el resultado de la evaluación.
+     * When: El usuario escribe la hora 10:00 con el horario 18:00-09:00 y pulsa Evaluar.
+     * Then: La tarjeta derecha muestra el badge "ERROR DE VALIDACIÓN" y el mensaje "La hora de cierre debe ser posterior a la hora de apertura."
      * Importancia: Evita que el formulario parezca no hacer nada o que el mensaje quede solo en la consola.
      */
     it('CA-04: muestra ERROR DE VALIDACIÓN ante un horario incoherente', () => {
