@@ -245,9 +245,41 @@ La migración es **aditiva**: no altera `id`, `nombre`, `categoria`, `ubicacion`
 
 `Museo de Arte Religioso` conserva coordenadas `NULL` y por tanto queda fuera de los resultados: demuestra el filtro `whereNotNull`. `SitioFactory` genera por defecto coordenadas aleatorias cercanas al centro de Cusco (±0.03°) y expone el estado `enCoordenadas(lat, lng)` para escenarios deterministas.
 
-## 6. Escenarios verificados en pruebas automatizadas
+## 6. Tipos de pruebas y escenarios verificados
 
-### Cypress (4 escenarios sobre `/sitios/cercanos`)
+| Tipo de prueba | Herramienta | Archivo | Cantidad CUS-05 | Qué valida |
+|---|---|---|---|---|
+| Unitarias | PHPUnit | `tests/Unit/CercaniaServiceTest.php` | 7 | Lógica pura: Haversine, rangos, valores no finitos, filtro y orden |
+| Integración (funcionales HTTP/BD) | PHPUnit Feature | `tests/Feature/CercaniaFeatureTest.php` | 9 | Rutas web/API, sesión, render Blade, BD SQLite y respuestas `422` |
+| Aceptación E2E | Cypress | `cypress/e2e/cercania_local.cy.js` | 4 | Flujo real en navegador: CA-01 a CA-04 sobre `/sitios/cercanos` |
+| Funcionales QA / Jira | Manual | Sección 7 | 4 CP | Casos CP-CUSCOGO-013 a CP-CUSCOGO-016 para ejecución manual |
+| Calidad estática y build | Pint + Vite | Archivos nuevos y `npm run build` | N/A | Estilo PHP y compilación de assets; no son pruebas funcionales |
+
+No se crearon suites separadas de contrato OpenAPI, rendimiento/carga ni pruebas de seguridad: la API REST se cubre dentro de las pruebas de integración con peticiones HTTP reales (GET/POST, `200` y `422`). El botón de geolocalización GPS **no tiene prueba E2E real** porque depende de permisos del navegador; los E2E usan los presets. Para cubrirlo habría que simular `navigator.geolocation.getCurrentPosition`.
+
+### 6.1 Pruebas unitarias (PHPUnit, 7)
+
+- `calcula distancia entre cusco y machu picchu`: Haversine dentro de 1 km de `73.0`.
+- `calcula distancia cero en el mismo punto`: mismo origen y destino devuelve `0.0`.
+- `lanza excepcion al calcular distancia con latitud invalida`: latitud `-95.0000`.
+- `lanza excepcion al calcular distancia con valor no finito`: `NAN`.
+- `valida coordenadas en rangos y limites`: `(-13.5167, -71.9781)` y `(-90, 180)` → `true`; `(-95.0000, -71.9781)` y `(0, 185)` → `false`.
+- `busca sitios cercanos dentro de cinco km y los ordena`: solo Plaza, Qorikancha y Sacsayhuaman, ordenados `0.0`, `0.5`, `0.86`, sin Machu Picchu.
+- `lanza excepcion si el radio no es mayor a cero`: radio `0`.
+
+### 6.2 Pruebas de integración (PHPUnit Feature, 9)
+
+- `muestra la vista interactiva de busqueda por cercania`: render con formulario, GPS, presets y `data-cy`.
+- `busca sitios cercanos en la web y guarda el resultado en sesion`: resultado con `total`, `origen` y `data` ordenado.
+- `muestra las tarjetas de resultados ordenadas en la vista`: badges de distancia visibles.
+- `muestra estado vacio cuando no hay sitios dentro del radio`: tarjeta *"Sin resultados en este radio"*.
+- `rechaza latitud fuera de rango en la web`: mensaje *"La latitud debe estar entre -90 y 90 grados."*.
+- `la api devuelve 200 con sitios ordenados por distancia`: GET con Machu Picchu `72.86 km` al final usando radio `100`.
+- `la api acepta tambien peticiones post`: POST con la misma envolvente `status: "ok"`.
+- `la api devuelve 422 ante coordenadas invalidas`.
+- `la api devuelve 422 ante un radio invalido`.
+
+### 6.3 Pruebas de aceptación (Cypress E2E, 4)
 
 | Escenario | Acción | Resultado esperado |
 |---|---|---|
@@ -256,22 +288,11 @@ La migración es **aditiva**: no altera `id`, `nombre`, `categoria`, `ubicacion`
 | CA-03 | Punto `(0, 0)` con radio `0.01 km` | Estado vacío *"Sin resultados en este radio"* y cero tarjetas |
 | CA-04 | Latitud `-95.0000` | `alerta-error` con *"La latitud debe estar entre -90 y 90 grados."* |
 
-### PHPUnit — Unit (`CercaniaServiceTest`, 7 pruebas)
+### 6.4 Resultado global verificado
 
-- Haversine Cusco → Machu Picchu dentro de 1 km de `73.0`; distancia `0` en el mismo punto.
-- Excepción con latitud `-95.0000` y con `NAN`.
-- `validarCoordenadas()` con `(-13.5167, -71.9781)` y `(-90, 180)` → `true`; con `(-95.0000, -71.9781)` y `(0, 185)` → `false`.
-- Búsqueda con radio 5 km: solo Plaza, Qorikancha y Sacsayhuaman, ordenados `0.0`, `0.5`, `0.86`, sin Machu Picchu.
-- Excepción con radio `0`.
-
-### PHPUnit — Feature (`CercaniaFeatureTest`, 9 pruebas)
-
-- Render de `/sitios/cercanos` con formulario, GPS, presets y `data-cy`.
-- Búsqueda web: resultado en sesión (`total`, `origen`, `data` ordenado) y tarjetas visibles con badges.
-- Estado vacío en la vista y rechazo web de latitud `-95.0000`.
-- API: `200` con GET ordenado por distancia (Machu Picchu `72.86 km` al final con radio 100), `200` con POST, `422` por coordenadas y por radio inválidos.
-
-Resultado global de la suite: **154 pruebas PHPUnit passing (435 assertions)** y **13/13 escenarios Cypress passing** (5 de CUS-03, 4 de CUS-04 y 4 de CUS-05), más `npm run build` exitoso sin advertencias de Tailwind CSS v4.
+- **PHPUnit:** 154 pruebas passing, 435 assertions (incluye 7 unitarias y 9 de integración de CUS-05).
+- **Cypress:** 13/13 escenarios passing (5 de CUS-03, 4 de CUS-04 y 4 de CUS-05).
+- **Calidad/compilación:** Pint limpio en los archivos de CUS-05 y `npm run build` exitoso sin advertencias de Tailwind CSS v4.
 
 ## 7. Casos de prueba funcionales para QA / Jira
 
