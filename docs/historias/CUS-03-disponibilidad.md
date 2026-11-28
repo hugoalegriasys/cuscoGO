@@ -27,7 +27,7 @@ No hay autenticación ni autorización en estas rutas (`authorize(): true`).
 - **Dominio:** `app/Contracts/DisponibilidadServiceInterface.php`, `app/Services/DisponibilidadService.php`, `app/Providers/AppServiceProvider.php` (binding interfaz → implementación).
 - **Persistencia:** `app/Models/Sitio.php`, `app/Models/HorarioAtencion.php`, `database/migrations/2026_09_30_000000_create_sitios_table.php`, `database/migrations/2026_10_01_000000_create_horarios_atencion_table.php`, `database/factories/SitioFactory.php`, `database/factories/HorarioAtencionFactory.php`, `database/seeders/SitioSeeder.php`, `database/seeders/DatabaseSeeder.php`.
 - **Vista:** `resources/views/sitios/disponibilidad.blade.php`.
-- **Pruebas:** `tests/Feature/DisponibilidadFeatureTest.php`, `tests/Unit/DisponibilidadServiceTest.php`, `cypress/e2e/disponibilidad_local.cy.js`, `cypress.config.js`, `package.json`.
+- **Pruebas:** `tests/Unit/DisponibilidadServiceTest.php`, `tests/Unit/EstadoOperatividadSitioServiceTest.php`, `tests/Feature/DisponibilidadFeatureTest.php`, `tests/Feature/DisponibilidadModelTest.php`, `tests/Feature/SitioPatrimonialControllerTest.php`, `cypress/e2e/disponibilidad_local.cy.js`, `cypress.config.js`, `package.json`.
 
 ## 3. Entradas, validaciones y mensajes de error exactos
 
@@ -174,7 +174,20 @@ Se crean únicamente cuando el driver es MySQL:
 
 En SQLite (entorno local y PHPUnit `:memory:`) no se crean estos `CHECK`; la coherencia queda cubierta por la validación de aplicación. Los accessors de `HorarioAtencion` normalizan `TIME` de MySQL (`HH:MM:SS`) a `HH:MM`.
 
-## 6. Escenarios ya verificados en pruebas automatizadas
+## 6. Tipos de pruebas y escenarios verificados
+
+### Tipos de prueba existentes
+
+| Tipo | Estado | Archivos / ubicación | Qué cubre |
+|---|---|---|---|
+| Unitarias | Ejecutadas | `tests/Unit/DisponibilidadServiceTest.php`, `tests/Unit/EstadoOperatividadSitioServiceTest.php` | Lógica pura del servicio: formato `HH:MM`, coherencia `apertura < cierre`, límites inclusivos, excepciones y conversión del DTO de sitio. |
+| Integración / Feature | Ejecutadas | `tests/Feature/DisponibilidadFeatureTest.php`, `tests/Feature/DisponibilidadModelTest.php`, `tests/Feature/SitioPatrimonialControllerTest.php` | HTTP web y API, validaciones, sesión, persistencia SQLite `:memory:`, relación sitio–horario, normalización de horas y `sitios.verificar`. |
+| Aceptación / E2E | Ejecutadas | `cypress/e2e/disponibilidad_local.cy.js` | 5 escenarios `CA-01` a `CA-04` sobre `/sitios/disponibilidad` en navegador real, usando los selectores `data-cy`. |
+| API / contrato | Ejecutadas | Dentro de `DisponibilidadFeatureTest.php` y `SitioPatrimonialControllerTest.php` | `POST /api/disponibilidad/evaluar` y `POST /sitios/{sitio}/verificar`: respuestas `200`/`422` con las 12 claves y los mensajes exactos. |
+| No funcionales | Artefactos creados, sin ejecución final | `tests/no-funcionales/cuscogo_rendimiento.jmx`, `tests/no-funcionales/cuscogo_carga.js`, `tests/no-funcionales/cuscogo_seguridad.yaml` | Rendimiento (JMeter), carga (k6) y seguridad (OWASP ZAP). JMeter y ZAP no están instalados; la ejecución de k6 se abortó. |
+| Build / estáticas | Ejecutadas | `npm run build`, `php artisan view:clear`, `git diff --check` | Compilación Vite/Tailwind v4, compilación de vistas Blade y diff sin errores. No hay scripts `lint`/`typecheck` definidos en `package.json`. |
+
+A nivel proyecto, Cypress tiene 4 specs y 17 escenarios en total; CUS-03 aporta los 5 listados a continuación.
 
 ### Cypress (5 escenarios, todos en modo manual sobre `/sitios/disponibilidad`)
 
@@ -188,14 +201,15 @@ En SQLite (entorno local y PHPUnit `:memory:`) no se crean estos `CHECK`; la coh
 
 Resultado de ejecución: **5/5 passing**.
 
-### PHPUnit — Unit (`DisponibilidadServiceTest`)
+### PHPUnit — Unit (`DisponibilidadServiceTest`, `EstadoOperatividadSitioServiceTest`)
 
 - Operatividad: `10:00` en `09:00–17:00` = abierto; `18:00` = cerrado; `09:00` y `17:00` exactos = abiertos; `08:59` y `17:01` = cerrados; `00:00` en `00:00–23:59` = abierto.
 - Coherencia: `08:00–16:00` válido; `18:00–09:00`, `09:00–09:00`, `9:00`, `24:00`, `08:60` y apertura vacía = inválidos.
 - Formato: válidos `00:00`, `09:05`, `23:59`; inválidos `24:00`, `12:60`, `7:05`, `12:00:00`.
 - Excepciones: horario `18:00–09:00`, hora `-10:00`, hora `25:00`, hora vacía y apertura `09:60`.
+- Sitio patrimonial (`EstadoOperatividadSitioServiceTest`): abierto dentro de horario, cerrado fuera de horario, sitio inactivo, evaluación con la hora actual, DTO abierto/cerrado/inactivo y normalización de hora al persistir.
 
-### PHPUnit — Feature (`DisponibilidadFeatureTest`, 21 pruebas)
+### PHPUnit — Feature e integración (`DisponibilidadFeatureTest`, 21 pruebas; `DisponibilidadModelTest`, 2; `SitioPatrimonialControllerTest`, 22)
 
 - Render de `/sitios/disponibilidad` con los campos `sitio_id`, `fecha`, `hora_actual`, `apertura` y `cierre`.
 - Modo manual: `10:00` con `09:00–17:00` → `ABIERTO`, `origen = manual`; `18:00` → `CERRADO`; límites `09:00` y `17:00` → abiertos.
@@ -203,8 +217,9 @@ Resultado de ejecución: **5/5 passing**.
 - Modo sitio: `"Qorikancha de prueba"`, fecha `2026-11-10` (martes), hora `12:30`, horario `09:00–17:00` → `ABIERTO`; también se cubren sitio sin horario, sitio inactivo y horario persistido incoherente (`18:00–09:00`).
 - Persistencia: relación sitio–horario, normalización de hora a `HH:MM` y unicidad (`sitio_id`, `dia_semana`).
 - API: `200` con las 12 claves de respuesta para `10:00`/`09:00–17:00`; `422` para `25:00`, para `18:00–09:00` y para sitio sin horario.
+- Integración y sitios: resolución del servicio desde el contenedor, `sitios.verificar` con hora enviada y con hora actual, borrado lógico y `404` para sitios inexistentes o eliminados.
 
-Resultado global: **88 pruebas PHPUnit passing (165 assertions)**.
+Resultado global actual de la suite completa: **164 pruebas PHPUnit passing (477 assertions)** y **17/17 escenarios Cypress passing** (4 specs: CUS-03, CUS-04, CUS-05 y CUS-06), más `npm run build` exitoso. CUS-03 aporta los 5 escenarios E2E de esta sección y sus pruebas unitarias, feature e integración.
 
 ## 7. Casos de prueba para Jira
 
