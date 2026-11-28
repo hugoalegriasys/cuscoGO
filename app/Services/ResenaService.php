@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Contracts\ResenaRepository;
+use App\Models\Resena;
+use InvalidArgumentException;
 
 class ResenaService
 {
@@ -10,6 +12,35 @@ class ResenaService
     public function __construct(
         private ResenaRepository $resenaRepository
     ) {
+    }
+
+    // Registra una nueva reseña validando calificación y comentario.
+    public function registrarResena(int $calificacion, string $comentario, ?string $sitioId = null): Resena
+    {
+        if (!$this->validarCalificacion($calificacion)) {
+            throw new InvalidArgumentException('La calificación debe estar entre 1 y 5.');
+        }
+
+        if (!$this->validarComentario($comentario)) {
+            throw new InvalidArgumentException('El comentario no puede estar vacío.');
+        }
+
+        $datos = [
+            'calificacion' => $calificacion,
+            'comentario' => trim($comentario),
+        ];
+
+        if ($sitioId !== null) {
+            $datos['sitio_id'] = $sitioId;
+        }
+
+        return $this->resenaRepository->guardar($datos);
+    }
+
+    // Obtiene todas las reseñas registradas a través del repositorio.
+    public function obtenerResenas(?string $sitioId = null): array
+    {
+        return $this->resenaRepository->obtenerTodas($sitioId);
     }
 
     // Valida que la calificación esté entre 1 y 5.
@@ -29,17 +60,17 @@ class ResenaService
     }
 
     // Obtiene las calificaciones y calcula su promedio.
-    public function calcularPromedioCalificaciones(): float
+    public function calcularPromedioCalificaciones(?string $sitioId = null): float
     {
         // Pide las calificaciones al repositorio.
-        $calificaciones = $this->resenaRepository->obtenerCalificaciones();
+        $calificaciones = $this->resenaRepository->obtenerCalificaciones($sitioId);
 
         // Si no existen calificaciones, devuelve 0.0.
         if (count($calificaciones) === 0) {
             return 0.0;
         }
 
-        // Calcula y devuelve el promedio.
-        return array_sum($calificaciones) / count($calificaciones);
+        // Calcula y devuelve el promedio redondeado a 1 decimal.
+        return round(array_sum($calificaciones) / count($calificaciones), 1);
     }
 }

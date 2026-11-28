@@ -12,6 +12,7 @@ class Resena extends Model
 
     // Campos que se pueden guardar mediante asignación masiva.
     protected $fillable = [
+        'sitio_id',
         'calificacion',
         'comentario',
     ];

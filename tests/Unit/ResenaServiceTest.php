@@ -3,7 +3,9 @@
 namespace Tests\Unit;
 
 use App\Contracts\ResenaRepository;
+use App\Models\Resena;
 use App\Services\ResenaService;
+use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
@@ -278,6 +280,130 @@ class ResenaServiceTest extends TestCase
 
         // Then: debe devolver 0.0.
         $this->assertSame(0.0, $resultado);
+    }
+
+    // ================= PRUEBAS CON DOBLE DE PRUEBA: STUB =================
+    // Un STUB proporciona respuestas preparadas (enlatadas / canned responses)
+    // para las llamadas realizadas durante la prueba. A diferencia de un Mock,
+    // el Stub NO verifica expectativas sobre cuántas veces se llama ni en qué orden.
+
+    public function test_registrar_resena_con_stub_retorna_resena_guardada(): void
+    {
+        // Given: Se crea un STUB de ResenaRepository mediante PHPUnit
+        $repositorioStub = $this->createStub(ResenaRepository::class);
+
+        // Preparamos la respuesta enlatada (canned response) que retornará el Stub
+        $resenaSimulada = new Resena([
+            'calificacion' => 5,
+            'comentario' => 'Excelente experiencia en Cusco',
+        ]);
+
+        $repositorioStub->method('guardar')
+            ->willReturn($resenaSimulada);
+
+        $service = new ResenaService($repositorioStub);
+
+        // When: Se registra la reseña con datos válidos
+        $resultado = $service->registrarResena(5, 'Excelente experiencia en Cusco');
+
+        // Then: El servicio retorna la instancia provista por el Stub
+        $this->assertInstanceOf(Resena::class, $resultado);
+        $this->assertSame(5, $resultado->calificacion);
+        $this->assertSame('Excelente experiencia en Cusco', $resultado->comentario);
+    }
+
+    public function test_registrar_resena_con_stub_lanza_excepcion_si_calificacion_es_menor_a_uno(): void
+    {
+        // Given: Se tiene el servicio con un STUB del repositorio
+        $repositorioStub = $this->createStub(ResenaRepository::class);
+        $service = new ResenaService($repositorioStub);
+
+        // Then: Se espera InvalidArgumentException por calificación menor a 1
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('La calificación debe estar entre 1 y 5.');
+
+        // When: Se intenta registrar con calificación 0
+        $service->registrarResena(0, 'Buen tour');
+    }
+
+    public function test_registrar_resena_con_stub_lanza_excepcion_si_calificacion_es_mayor_a_cinco(): void
+    {
+        // Given: Se tiene el servicio con un STUB del repositorio
+        $repositorioStub = $this->createStub(ResenaRepository::class);
+        $service = new ResenaService($repositorioStub);
+
+        // Then: Se espera InvalidArgumentException por calificación mayor a 5
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('La calificación debe estar entre 1 y 5.');
+
+        // When: Se intenta registrar con calificación 6
+        $service->registrarResena(6, 'Maravilloso');
+    }
+
+    public function test_registrar_resena_con_stub_lanza_excepcion_si_comentario_esta_vacio(): void
+    {
+        // Given: Se tiene el servicio con un STUB del repositorio
+        $repositorioStub = $this->createStub(ResenaRepository::class);
+        $service = new ResenaService($repositorioStub);
+
+        // Then: Se espera InvalidArgumentException por comentario vacío
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('El comentario no puede estar vacío.');
+
+        // When: Se intenta registrar con un comentario vacío
+        $service->registrarResena(4, '');
+    }
+
+    public function test_registrar_resena_con_stub_lanza_excepcion_si_comentario_solo_tiene_espacios(): void
+    {
+        // Given: Se tiene el servicio con un STUB del repositorio
+        $repositorioStub = $this->createStub(ResenaRepository::class);
+        $service = new ResenaService($repositorioStub);
+
+        // Then: Se espera InvalidArgumentException por comentario de solo espacios
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('El comentario no puede estar vacío.');
+
+        // When: Se intenta registrar con espacios en blanco
+        $service->registrarResena(5, '     ');
+    }
+
+    public function test_calcular_promedio_con_stub_de_respuestas_enlatadas(): void
+    {
+        // Given: El STUB provee un conjunto fijo de calificaciones sin verificar número de llamadas
+        $repositorioStub = $this->createStub(ResenaRepository::class);
+        $repositorioStub->method('obtenerCalificaciones')
+            ->willReturn([5, 4, 3]);
+
+        $service = new ResenaService($repositorioStub);
+
+        // When: Se calcula el promedio
+        $resultado = $service->calcularPromedioCalificaciones();
+
+        // Then: El promedio debe ser 4.0
+        $this->assertSame(4.0, $resultado);
+    }
+
+    public function test_obtener_resenas_con_stub_retorna_lista_enlatada(): void
+    {
+        // Given: El STUB provee un listado predefinido de reseñas
+        $resenasEnlatadas = [
+            ['id' => 1, 'calificacion' => 5, 'comentario' => 'Imperdible'],
+            ['id' => 2, 'calificacion' => 4, 'comentario' => 'Muy bueno'],
+        ];
+
+        $repositorioStub = $this->createStub(ResenaRepository::class);
+        $repositorioStub->method('obtenerTodas')
+            ->willReturn($resenasEnlatadas);
+
+        $service = new ResenaService($repositorioStub);
+
+        // When: Se obtienen las reseñas
+        $resultado = $service->obtenerResenas();
+
+        // Then: Debe retornar exactamente la lista enlatada
+        $this->assertCount(2, $resultado);
+        $this->assertSame($resenasEnlatadas, $resultado);
     }
 
     // Crea el servicio con un repositorio simulado.
