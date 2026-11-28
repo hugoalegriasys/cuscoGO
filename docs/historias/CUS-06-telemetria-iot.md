@@ -159,13 +159,17 @@ Los modos demo invalidan la clave de caché del sitio para que "En vivo" no se c
 | `alerta-503` | Error controlado sin lecturas previas |
 | `estado-vacio` | Estado inicial del panel |
 
-## 6. Matriz de pruebas ejecutadas
+## 6. Tipos de pruebas implementados
 
-| Capa | Archivo | Escenarios | Resultado |
-|---|---|---|---|
-| Unitaria | `tests/Unit/TelemetriaAforoServiceTest.php` | 6 casos: payload válido, HTTP 500, timeout, fallback con 70 y stale, sin histórico (503), persistencia + una sola petición con caché | Verde |
-| Feature | `tests/Feature/TelemetriaFeatureTest.php` | 4 casos: API en vivo persiste, API con histórico devuelve stale, API sin histórico devuelve 503, vista web carga | Verde |
-| E2E | `cypress/e2e/telemetria_local.cy.js` | 4 casos: carga del panel, vivo 85%, fallback 45% con stale, alerta HTTP 503 | Verde |
+Todas las pruebas automatizadas están documentadas con la estructura `Given / When / Then` en sus comentarios. La cobertura de CUS-06 se organiza así:
+
+| Tipo de prueba | Archivo | Alcance | Escenarios | Resultado |
+|---|---|---|---|---|
+| Unitaria | `tests/Unit/TelemetriaAforoServiceTest.php` | Aísla `HttpSiteSensorClient` y `TelemetriaAforoService` con `Http::fake()`, caché en memoria y SQLite; no levanta rutas HTTP. | 6 casos: payload válido, HTTP 500, timeout, fallback con `stale=true`, sin histórico (503) y persistencia con una sola petición. | Verde |
+| Integración | `tests/Feature/TelemetriaFeatureTest.php` | Recorre ruta real, binding condicional de `{sitio}`, controlador, servicio, base de datos y render Blade. | 4 casos: API en vivo persiste, API con histórico devuelve `stale`, API sin histórico devuelve 503 y vista web carga. | Verde |
+| Contrato HTTP | `tests/Feature/TelemetriaFeatureTest.php` | Validado dentro de integración: envelope `{ data: ... }`, códigos HTTP `200`/`503` y error `SENSOR_NO_DISPONIBLE`. | 3 casos API | Verde |
+| Aceptación / E2E | `cypress/e2e/telemetria_local.cy.js` | Navegador real contra `php artisan serve` y base sembrada. Usa modos demo deterministas porque `Http::fake()` solo existe en PHPUnit. | 4 casos: carga inicial, vivo 85%, fallback 45% con `stale` y alerta HTTP 503. | Verde |
+| Aceptación manual (QA/Jira) | Sección 7 | Guía ejecutable por QA en el entorno local, sin automatizar. | 5 casos `CP-CUSCOGO-026` a `CP-CUSCOGO-030` | Documentado |
 
 Comandos de verificación:
 
@@ -177,14 +181,14 @@ php artisan serve
 npx cypress run
 ```
 
-La suite completa incluye CUS-01 a CUS-06. `php artisan test` usa SQLite `:memory:` y `CACHE_STORE=array`; Cypress usa la base sembrada del servidor local en `127.0.0.1:8000`.
+CUS-06 aporta 10 pruebas PHPUnit y 4 pruebas Cypress. La suite completa incluye CUS-01 a CUS-06: `php artisan test` ejecuta 164 pruebas con SQLite `:memory:` y `CACHE_STORE=array`; Cypress usa la base sembrada del servidor local en `127.0.0.1:8000`.
 
 ## 7. Casos de prueba funcionales para QA / Jira
 
 | ID | Pasos | Resultado esperado |
 |---|---|---|
 | CP-CUSCOGO-026 | Seleccionar Machu Picchu, modo `vivo`, consultar | 85%, badge `En vivo (IoT)`, barra al 85% |
-| CP-CUSCOGO-027 | Seleccionar Qorikancha, modo `fallback`, consultar | 45%, badge `Respaldo histórico` y aviso `stale = true` |
+| CP-CUSCOGO-027 | Seleccionar Qorikancha, modo `fallback`, consultar | 45%, badge `Fallback · Respaldo histórico` y aviso `stale = true` |
 | CP-CUSCOGO-028 | Seleccionar Museo de Arte Religioso, modo `fallback`, consultar | Alerta HTTP 503 con `SENSOR_NO_DISPONIBLE` |
 | CP-CUSCOGO-029 | Llamar dos veces seguidas a `GET /api/sitios/{id}/telemetria` con sensor activo | Segunda respuesta con `origen = "cache"`; una sola fila nueva en `aforo_lecturas` |
 | CP-CUSCOGO-030 | Simular HTTP 500 del sensor con histórico en BD | HTTP 200 con `stale = true`; la caché viva no se sobrescribe |
